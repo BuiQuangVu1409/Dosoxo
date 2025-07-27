@@ -23,7 +23,7 @@ public class TinhTienService implements ITinhTienService {
     KetQuaMienNamRepository namRepo;
     @Autowired
     KetQuaMienTrungRepository trungRepo;
-    public double tinhTienTrung(String cachDanh, String tienDanh) {
+    public double tinhTienTrung(String cachDanh, String tienDanh, String mien) {
         String loai = removeDiacritics(cachDanh).toUpperCase().replaceAll("\\s+", "");
 
         if (loai.equals("3CHAN")) return 0; // đã xử lý riêng
@@ -36,21 +36,132 @@ public class TinhTienService implements ITinhTienService {
         }
 
         return switch (loai) {
-            case "XUYEN2" -> tienDanhDouble * 2000;
-            case "XUYEN3" -> tienDanhDouble * 5000;
-            case "XUYEN4" -> tienDanhDouble * 10000;
-            case "2CHAN" -> tienDanhDouble * 1500;
-//            case "DAU", "DUOI" -> tienDanhDouble * 700;
-            case "BAOLO" -> tienDanhDouble * 90;
-            case "DAUMIENBAC" -> tienDanhDouble * 800;
-            case "DAUMIENTRUNG", "DAUMIENNAM" -> tienDanhDouble * 1500;
-            case "DUOIMIENBAC" -> tienDanhDouble * 1200;
-            case "DUOIMIENTRUNG", "DUOIMIENNAM" -> tienDanhDouble * 1500;
-            case "DAUDUOIMIENBAC" -> tienDanhDouble * 1500;
-            case "DAUDUOIMIENTRUNG", "DAUDUOIMIENNAM" -> tienDanhDouble * 2500;
+            //tính tiền xuyên
+            case "XUYEN2" -> {
+                String m = removeDiacritics(mien).toUpperCase();
+                if (m.contains("BAC")) {
+                    yield tienDanhDouble * 10;
+                } else if (m.contains("TRUNG")) {
+                    yield tienDanhDouble * 15;
+                } else if (m.contains("NAM")) {
+                    yield tienDanhDouble * 15;
+                } else {
+                    yield 0;
+                }
+            }
+            case "XUYEN3" -> {
+                String m = removeDiacritics(mien).toUpperCase();
+                if (m.contains("BAC")) {
+                    yield tienDanhDouble * 40;
+                } else if (m.contains("TRUNG")) {
+                    yield tienDanhDouble * 60;
+                } else if (m.contains("NAM")) {
+                    yield tienDanhDouble * 60;
+                } else {
+                    yield 0;
+                }
+            }
+            case "XUYEN4" -> {
+                String m = removeDiacritics(mien).toUpperCase();
+                if (m.contains("BAC")) {
+                    yield tienDanhDouble * 100;
+                } else if (m.contains("TRUNG")) {
+                    yield tienDanhDouble * 120;
+                } else if (m.contains("NAM")) {
+                    yield tienDanhDouble * 120;
+                } else {
+                    yield 0;
+                }
+            }
+            case "XUYEN5" -> {
+                String m = removeDiacritics(mien).toUpperCase();
+                if (m.contains("BAC")) {
+                    yield tienDanhDouble * 200;
+                } else if (m.contains("TRUNG")) {
+                    yield tienDanhDouble * 250;
+                } else if (m.contains("NAM")) {
+                    yield tienDanhDouble * 250;
+                } else {
+                    yield 0;
+                }
+            }
+
+
+            // tính tiền 2 chân
+            case "2CHAN" -> {
+                String m = removeDiacritics(mien).toUpperCase().trim();
+                if (m.contains("BAC")) {
+                    yield tienDanhDouble * 70 / 27 ;
+                } else if (m.contains("TRUNG")) {
+                    yield tienDanhDouble * 70 / 18;
+                } else if (m.contains("NAM")) {
+                    yield tienDanhDouble * 70/ 18 ;
+                } else {
+                    yield 0;
+                }
+            }
+
+//            case "DAUMIENBAC" -> tienDanhDouble * 70 / 4 ;
+//            case "DAUMIENTRUNG", "DAUMIENNAM" -> tienDanhDouble * 70;
+//            case "DUOIMIENBAC" -> tienDanhDouble * 70;
+//            case "DUOIMIENTRUNG", "DUOIMIENNAM" -> tienDanhDouble * 70;
+//            case "DAUDUOIMIENBAC" -> tienDanhDouble * 70 / 5;
+//            case "DAUDUOIMIENTRUNG", "DAUDUOIMIENNAM" -> tienDanhDouble * 70 / 2 ;
+
+            case "DAU" -> {
+                String m = removeDiacritics(mien).toUpperCase();
+                if (m.contains("BAC")) {
+                    yield tienDanhDouble * 70 / 4;
+                } else if (m.contains("TRUNG")) {
+                    yield tienDanhDouble * 70;
+                } else if (m.contains("NAM")) {
+                    yield tienDanhDouble * 70;
+                } else {
+                    yield 0;
+                }
+            }
+            // ĐUÔI
+            case "DUOI" -> {
+                String m = removeDiacritics(mien).toUpperCase();
+                if (m.contains("BAC")) {
+                    yield tienDanhDouble * 70;
+                } else if (m.contains("TRUNG")) {
+                    yield tienDanhDouble * 70;
+                } else if (m.contains("NAM")) {
+                    yield tienDanhDouble * 70;
+                } else {
+                    yield 0;
+                }
+            }
+
+            // ĐẦU ĐUÔI
+            case "DAUDUOI" -> {
+                String m = removeDiacritics(mien).toUpperCase();
+                if (m.contains("BAC")) {
+                    yield tienDanhDouble * 70 / 5;
+                } else if (m.contains("TRUNG")) {
+                    yield tienDanhDouble * 70 / 2;
+                } else if (m.contains("NAM")) {
+                    yield tienDanhDouble * 70 / 2;
+                } else {
+                    yield 0;
+                }
+            }
+            // LỚN , nhỏ
+            case "LON", "NHO" -> {
+                String m = removeDiacritics(mien).toUpperCase();
+                if (m.contains("BAC")) {
+                    yield tienDanhDouble * 1.95;
+                } else if (m.contains("TRUNG") || m.contains("NAM")) {
+                    yield tienDanhDouble * 1.95;
+                } else {
+                    yield 0;
+                }
+            }
+
+
+
             default -> 0;
-
-
         };
     }
 
@@ -64,3 +175,15 @@ public class TinhTienService implements ITinhTienService {
     }
 
 }
+//    private double tinhTienLon(double tien, String mien) {
+//        String m = removeDiacritics(mien).toUpperCase();
+//        if (m.contains("BAC")) return tien * 1.8;
+//        if (m.contains("TRUNG") || m.contains("NAM")) return tien * 2;
+//        return 0;
+//    }
+//
+//    private double tinhTienNho(double tien, String mien) {
+//        return tinhTienLon(tien, mien); // vì logic giống nhau
+//    }
+//case "LON" -> tinhTienLon(tienDanhDouble, mien);
+//        case "NHO" -> tinhTienNho(tienDanhDouble, mien);

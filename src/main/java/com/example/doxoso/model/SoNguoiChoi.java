@@ -1,5 +1,6 @@
 package com.example.doxoso.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,6 +24,7 @@ public class SoNguoiChoi {
     private String thu;
     private String tenDai;
     private String mien;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate ngay;
     private String cachDanh;
     private String tienDanh;

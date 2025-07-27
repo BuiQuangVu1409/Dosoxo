@@ -10,7 +10,6 @@ import java.util.List;
 
 public interface KetQuaMienBacRepository extends JpaRepository<KetQuaMienBac, Long> {
     List<KetQuaMienBac> findAllByNgay(LocalDate ngay);
-//    List<KetQuaMienBac> findAllByNgayAndTenDai(LocalDate ngay, String tenDai);
 
 
 

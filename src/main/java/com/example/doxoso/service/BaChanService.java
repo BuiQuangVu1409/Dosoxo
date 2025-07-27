@@ -25,6 +25,9 @@ public class BaChanService {
         double tienThuongMax = 0;
         double tienDacBietMax = 0;
 
+        String mienChuan = mien.trim().toUpperCase();
+
+
         for (Object kq : danhSachKetQua) {
             String soTrung = getField(kq, "getSoTrung");
             String giaiRaw = getField(kq, "getGiai");
@@ -34,18 +37,45 @@ public class BaChanService {
 
             double tienBL = 0, tienT = 0, tienDB = 0;
             String loaiTrung = "";
-
+            // tính tiền đặc biệt
             if ("ĐẶC BIỆT".equalsIgnoreCase(giai)) {
-                tienBL = tienBaoLo * 1500;
-                tienT = tienThuong * 3000;
-                tienDB = tienDacBiet * 10000;
+                if (mienChuan.contains("BẮC")) {
+                    tienBL = tienBaoLo * 600 / 23;
+                    tienT = tienThuong * 600 / 10;
+                    tienDB = tienDacBiet * 600;
+                } else if (mienChuan.contains("TRUNG")) {
+                    tienBL = tienBaoLo * 600 / 17;
+                    tienT = tienThuong * 100;
+                    tienDB = tienDacBiet * 600;
+                } else if (mienChuan.contains("NAM")) {
+                    tienBL = tienBaoLo * 600 / 17;
+                    tienT = tienThuong * 100;
+                    tienDB = tienDacBiet * 600;
+                }
                 loaiTrung = "Đặc biệt";
+                //tính tiền thượng
             } else if (isLoThuong(mien, giai)) {
-                tienBL = tienBaoLo * 1500;
-                tienT = tienThuong * 3000;
+                if (mienChuan.contains("BẮC")) {
+                    tienBL = tienBaoLo * 600 / 23;
+                    tienT = tienThuong * 600 / 10;
+                } else if (mienChuan.contains("TRUNG")) {
+                    tienBL = tienBaoLo * 600 / 17;
+                    tienT = tienThuong * 100;
+                } else if (mienChuan.contains("NAM")) {
+                    tienBL = tienBaoLo * 600 / 17;
+                    tienT = tienThuong * 100;
+                }
                 loaiTrung = "Lô thượng";
+                // tính tiền lô
             } else {
-                tienBL = tienBaoLo * 1500;
+
+                if (mienChuan.contains("BẮC")) {
+                    tienBL = tienBaoLo * 600 / 23;
+                } else if (mienChuan.contains("TRUNG")) {
+                    tienBL = tienBaoLo * 600 / 17;
+                } else if (mienChuan.contains("NAM")) {
+                    tienBL = tienBaoLo * 600 / 17;
+                }
                 loaiTrung = "Bao lô";
             }
 
@@ -64,31 +94,136 @@ public class BaChanService {
 
         if (maxTongTien > 0) {
             dto.setTrung(true);
-            dto.setTienTrung(maxTongTien);
+
             dto.setCachTrung(loaiTrungMax);
             dto.setGiaiTrung(giaiTrungMax);
+// làm tròn 2 số thập phân
+            dto.setTienTrung(Math.round(maxTongTien));
+            dto.setTienTrungBaoLo((double) Math.round(tienBaoLoMax));
+            dto.setTienTrungThuong((double) Math.round(tienThuongMax));
+            dto.setTienTrungDacBiet((double) Math.round(tienDacBietMax));
 
-            dto.setTienTrungBaoLo(tienBaoLoMax);
-            dto.setTienTrungThuong(tienThuongMax);
-            dto.setTienTrungDacBiet(tienDacBietMax);
+
+
         } else {
             dto.setTrung(false);
             dto.setTienTrung(0);
             dto.setSaiLyDo(List.of("Sai số"));
         }
     }
+//    public void xuLyBaChan(DoiChieuKetQuaDto dto, String soDanh, String tienChuoi, String mien, List<Object> danhSachKetQua) {
+//        double[] tien = tachTienDanhBaChan(tienChuoi);
+//        double tienBaoLo = tien[0];
+//        double tienThuong = tien[1];
+//        double tienDacBiet = tien[2];
+//
+//        double maxTongTien = 0;
+//        String loaiTrungMax = null;
+//        String giaiTrungMax = null;
+//
+//        double tienBaoLoMax = 0;
+//        double tienThuongMax = 0;
+//        double tienDacBietMax = 0;
+//
+//        String mienChuan = mien.trim().toUpperCase();
+//
+//        for (Object kq : danhSachKetQua) {
+//            String soTrung = getField(kq, "getSoTrung");
+//            String giaiRaw = getField(kq, "getGiai");
+//            String giai = chuanHoaTenGiai(giaiRaw);
+//
+//            // Kiểm tra số trúng có đúng định dạng không
+//            if (soTrung == null || !chuaDu3ChuSo(soTrung, soDanh)) continue;
+//
+//            double tienBL = 0, tienT = 0, tienDB = 0;
+//            String loaiTrung = "";
+//
+//            // Tính tiền cho từng loại giải
+//            if ("ĐẶC BIỆT".equalsIgnoreCase(giai)) {
+//                // Tính tiền theo miền
+//                tienBL = calculateTienBaoLo(tienBaoLo, mienChuan);
+//                tienT = tienThuong * (mienChuan.contains("BẮC") ? 60 : 100);
+//                tienDB = tienDacBiet * 600;
+//                loaiTrung = "Đặc biệt";
+//            } else if (isLoThuong(mien, giai)) {
+//                tienBL = calculateTienBaoLo(tienBaoLo, mienChuan);
+//                tienT = tienThuong * (mienChuan.contains("BẮC") ? 60 : 100);
+//                loaiTrung = "Lô thượng";
+//            } else {
+//                tienBL = calculateTienBaoLo(tienBaoLo, mienChuan);
+//                loaiTrung = "Bao lô";
+//            }
+//
+//            double tongTien = tienBL + tienT + tienDB;
+//
+//            if (tongTien > maxTongTien) {
+//                maxTongTien = tongTien;
+//                loaiTrungMax = loaiTrung;
+//                giaiTrungMax = giai;
+//
+//                tienBaoLoMax = tienBL;
+//                tienThuongMax = tienT;
+//                tienDacBietMax = tienDB;
+//            }
+//        }
+//
+//        if (maxTongTien > 0) {
+//            dto.setTrung(true);
+//            dto.setCachTrung(loaiTrungMax);
+//            dto.setGiaiTrung(giaiTrungMax);
+//            dto.setTienTrung(Math.round(maxTongTien));
+//            dto.setTienTrungBaoLo((double) Math.round(tienBaoLoMax));
+//            dto.setTienTrungThuong((double) Math.round(tienThuongMax));
+//            dto.setTienTrungDacBiet((double) Math.round(tienDacBietMax));
+//        } else {
+//            dto.setTrung(false);
+//            dto.setTienTrung(0);
+//            dto.setSaiLyDo(List.of("Sai số"));
+//        }
+//    }
 
+    // Hàm tính tiền bao lô theo miền
+//    private double calculateTienBaoLo(double tienBaoLo, String mienChuan) {
+//        switch (mienChuan) {
+//            case "BẮC":
+//                return tienBaoLo * 600 / 23;
+//            case "TRUNG":
+//            case "NAM":
+//                return tienBaoLo * 600 / 17;
+//            default:
+//                return 0;
+//        }
+//    }
 
 
 
     // Hàm phụ tách tiền, cho phép thiếu hoặc rỗng → gán 0
+//    public double[] tachTienDanhBaChan(String tienDanh) {
+//        double[] tien = new double[] {0.0, 0.0, 0.0}; // [baoLo, thuong, dacBiet]
+//
+//        if (tienDanh == null || tienDanh.trim().isEmpty()) return tien;
+//
+//        String[] parts = tienDanh.trim().split("-");
+//
+//        for (int i = 0; i < Math.min(3, parts.length); i++) {
+//            String part = parts[i].trim();
+//            if (!part.isEmpty()) {
+//                try {
+//                    tien[i] = Double.parseDouble(part);
+//                } catch (NumberFormatException e) {
+//                    throw new IllegalArgumentException("Tiền không hợp lệ ở vị trí " + (i + 1) + ": " + part);
+//                }
+//            }
+//        }
+//
+//        return tien;
+//    }
     public double[] tachTienDanhBaChan(String tienDanh) {
         double[] tien = new double[] {0.0, 0.0, 0.0}; // [baoLo, thuong, dacBiet]
 
         if (tienDanh == null || tienDanh.trim().isEmpty()) return tien;
 
         String[] parts = tienDanh.trim().split("-");
-
         for (int i = 0; i < Math.min(3, parts.length); i++) {
             String part = parts[i].trim();
             if (!part.isEmpty()) {
@@ -102,7 +237,6 @@ public class BaChanService {
 
         return tien;
     }
-
     // Xác định có phải lô thượng hay không (tùy miền)
     public boolean isLoThuong(String mien, String giai) {
         String g = giai.toUpperCase();

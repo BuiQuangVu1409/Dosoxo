@@ -9,11 +9,11 @@ import java.time.LocalDate;
 @Setter
 @Entity
 @Table(name = "ket_qua_mien_trung")
+
 public class KetQuaMienTrung {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String soTrung;
     private String giai;
     private String tenDai;

@@ -38,7 +38,10 @@ public class KiemTraKetQuaService {
     private DuoiService duoiService;
     @Autowired
     private DauDuoiService dauDuoiService;
-
+    @Autowired
+    private LonService lonService;
+    @Autowired
+    private NhoService nhoService;
     public DoiChieuKetQuaDto kiemTraSo(SoNguoiChoi so) {
         DoiChieuKetQuaDto dto = new DoiChieuKetQuaDto();
 
@@ -80,7 +83,11 @@ public class KiemTraKetQuaService {
             if (trung) {
                 dto.setTrung(true);
                 dto.setGiaiTrung("Trúng 2 chân");
-                dto.setTienTrung(tinhTienService.tinhTienTrung("2CHAN", so.getTienDanh()));
+                // tính tiền ở tính tiền service
+                dto.setTienTrung(
+                        tinhTienService.tinhTienTrung("2CHAN", so.getTienDanh(), so.getMien())
+                );
+
                 dto.setSaiLyDo(null);
             } else {
                 dto.setTrung(false);
@@ -91,6 +98,26 @@ public class KiemTraKetQuaService {
         }
 
         // Xuyên
+//        if (xuyenService.laCachDanhXuyen(cachDanhChuanHoa)) {
+//            dto.setTienDanh(so.getTienDanh());
+//            Optional<String> tenDaiTrung = xuyenService.xuLyTrungXuyen(cachDanhChuanHoa, so.getSoDanh(), so.getNgay(), so.getMien());
+//            dto.setCachTrung(so.getCachDanh());
+//            if (tenDaiTrung.isPresent()) {
+//                dto.setTrung(true);
+//                dto.setGiaiTrung("Trúng " + so.getCachDanh() + " tại " + tenDaiTrung.get());
+//              // tính tiền ở tinh tien service
+//                dto.setTienTrung(
+//                        tinhTienService.tinhTienTrung("XUYEN2", so.getTienDanh(), so.getMien())
+//                );
+//
+//                dto.setTenDai(tenDaiTrung.get());
+//            } else {
+//                dto.setTrung(false);
+//                dto.setTienTrung(0);
+//                dto.setSaiLyDo(List.of("Không trúng " + so.getCachDanh()));
+//            }
+//            return dto;
+//        }
         if (xuyenService.laCachDanhXuyen(cachDanhChuanHoa)) {
             dto.setTienDanh(so.getTienDanh());
             Optional<String> tenDaiTrung = xuyenService.xuLyTrungXuyen(cachDanhChuanHoa, so.getSoDanh(), so.getNgay(), so.getMien());
@@ -98,7 +125,12 @@ public class KiemTraKetQuaService {
             if (tenDaiTrung.isPresent()) {
                 dto.setTrung(true);
                 dto.setGiaiTrung("Trúng " + so.getCachDanh() + " tại " + tenDaiTrung.get());
-                dto.setTienTrung(tinhTienService.tinhTienTrung(so.getCachDanh(), so.getTienDanh()));
+
+                // ✅ tính tiền đúng loại XUYÊN
+                dto.setTienTrung(
+                        tinhTienService.tinhTienTrung(cachDanhChuanHoa, so.getTienDanh(), so.getMien())
+                );
+
                 dto.setTenDai(tenDaiTrung.get());
             } else {
                 dto.setTrung(false);
@@ -157,6 +189,44 @@ public class KiemTraKetQuaService {
             dto.setTenDai(ketQuaDauDuoi.getTenDai());
             return dto;
         }
+        // LỚN
+        if (cachDanhChuanHoa.equals("LON")) {
+            DoiChieuKetQuaDto ketQuaLon = lonService.xuLyLon(
+                    so.getSoDanh(),
+                    so.getMien(),
+                    so.getTenDai(),
+                    so.getNgay(),
+                    so.getTienDanh()
+            );
+
+            dto.setTrung(ketQuaLon.isTrung());
+            dto.setGiaiTrung(ketQuaLon.getGiaiTrung());
+            dto.setTienTrung(ketQuaLon.getTienTrung());
+            dto.setCachTrung("LỚN");
+            dto.setSaiLyDo(ketQuaLon.getSaiLyDo());
+            dto.setTenDai(ketQuaLon.getTenDai());
+            return dto;
+        }
+
+// NHỎ
+        if (cachDanhChuanHoa.equals("NHO")) {
+            DoiChieuKetQuaDto ketQuaNho = nhoService.xuLyNho(
+                    so.getSoDanh(),
+                    so.getMien(),
+                    so.getTenDai(),
+                    so.getNgay(),
+                    so.getTienDanh()
+            );
+
+            dto.setTrung(ketQuaNho.isTrung());
+            dto.setGiaiTrung(ketQuaNho.getGiaiTrung());
+            dto.setTienTrung(ketQuaNho.getTienTrung());
+            dto.setCachTrung("NHỎ");
+            dto.setSaiLyDo(ketQuaNho.getSaiLyDo());
+            dto.setTenDai(ketQuaNho.getTenDai());
+            return dto;
+        }
+
 
         return dto;
     }

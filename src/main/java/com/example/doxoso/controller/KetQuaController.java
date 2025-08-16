@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.text.Normalizer;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -54,9 +55,12 @@ public class KetQuaController {
         }
 
 
-
     @GetMapping("/ketqua")
-    public List<KetQuaTheoDaiDto> layKetQuaTheoNgay(@RequestParam("ngay") String ngayStr) {
+    public List<KetQuaTheoDaiDto> layKetQuaTheoNgayVaLoc(
+            @RequestParam("ngay") String ngayStr,
+            @RequestParam(name = "mien", required = false) String mien,
+            @RequestParam(name = "dai", required = false) String tenDai) {
+
         LocalDate ngay;
         try {
             ngay = LocalDate.parse(ngayStr);
@@ -66,26 +70,33 @@ public class KetQuaController {
 
         List<KetQuaTheoDaiDto> ketQua = new ArrayList<>();
 
-        List<KetQuaMienBac> mb = bacRepo.findAllByNgay(ngay);
-        if (!mb.isEmpty()) {
-            ketQua.add(new KetQuaTheoDaiDto("MIỀN BẮC", "HÀ NỘI", mb));
+        if (mien == null || mien.equalsIgnoreCase("MIỀN BẮC")) {
+            List<KetQuaMienBac> mb = bacRepo.findAllByNgay(ngay);
+            if (!mb.isEmpty()) {
+                if (tenDai == null || "HÀ NỘI".equalsIgnoreCase(tenDai)) {
+                    ketQua.add(new KetQuaTheoDaiDto("MIỀN BẮC", "HÀ NỘI", mb));
+                }
+            }
         }
 
-        trungRepo.findAllByNgay(ngay).stream()
-                .collect(Collectors.groupingBy(KetQuaMienTrung::getTenDai))
-                .forEach((tenDai, ds) -> ketQua.add(new KetQuaTheoDaiDto("MIỀN TRUNG", tenDai, ds)));
+        if (mien == null || mien.equalsIgnoreCase("MIỀN TRUNG")) {
+            trungRepo.findAllByNgay(ngay).stream()
+                    .filter(kq -> tenDai == null || kq.getTenDai().equalsIgnoreCase(tenDai))
+                    .collect(Collectors.groupingBy(KetQuaMienTrung::getTenDai))
+                    .forEach((dai, ds) -> ketQua.add(new KetQuaTheoDaiDto("MIỀN TRUNG", dai, ds)));
+        }
 
-        namRepo.findAllByNgay(ngay).stream()
-                .collect(Collectors.groupingBy(KetQuaMienNam::getTenDai))
-                .forEach((tenDai, ds) -> ketQua.add(new KetQuaTheoDaiDto("MIỀN NAM", tenDai, ds)));
+        if (mien == null || mien.equalsIgnoreCase("MIỀN NAM")) {
+            namRepo.findAllByNgay(ngay).stream()
+                    .filter(kq -> tenDai == null || kq.getTenDai().equalsIgnoreCase(tenDai))
+                    .collect(Collectors.groupingBy(KetQuaMienNam::getTenDai))
+                    .forEach((dai, ds) -> ketQua.add(new KetQuaTheoDaiDto("MIỀN NAM", dai, ds)));
+        }
 
         return ketQua;
     }
 
-
-
-//
-
+///ketqua?ngay=2025-08-11&mien=MIỀN NAM
 
 
 
@@ -135,13 +146,22 @@ public class KetQuaController {
             @PathVariable("ketqua") String ketqua,
             @PathVariable("cachdanh") String cachDanh
     ) {
+        String cachDanhNormalized = Normalizer.normalize(cachDanh, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "")
+                .toLowerCase();
+
+        if ("dau".equals(cachDanhNormalized)) {
+            cachDanh = "dau";
+        }
+        if("duoi".equals(cachDanhNormalized)){
+            cachDanh = "duoi";
+        }
+        if("dauduoi".equals(cachDanhNormalized)){
+            cachDanh = "dauduoi";
+        }
+
+
+        // Bạn có thể mở rộng thêm các chuẩn hóa khác nếu cần
         return ketQuaService.locTheoKetQuaVaCachDanh(ketqua, cachDanh);
     }
-
-
-
-
-
-
-
 }

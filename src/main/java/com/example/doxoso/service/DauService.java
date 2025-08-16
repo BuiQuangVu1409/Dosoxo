@@ -1,164 +1,326 @@
-    package com.example.doxoso.service;
+//        public DoiChieuKetQuaDto xuLyDau(String soDanh, String mien, LocalDate ngay, String tienDanh) {
+//            DoiChieuKetQuaDto dto = new DoiChieuKetQuaDto();
+//            dto.setSoDanh(soDanh);
+//            dto.setMien(mien);
+//            dto.setNgay(ngay);
+//            dto.setThu(chuyenNgaySangThu(ngay));
+//            dto.setCachDanh("DAU");
+//            dto.setTienDanh(tienDanh);
+//            dto.setDanhSachDai(new ArrayList<>());
+//
+//            if (tienDanh == null) {
+//                dto.setTrung(false);
+//                dto.setTienTrung(0);
+//                dto.setSaiLyDo(List.of("Thiếu tiền đánh"));
+//                return dto;
+//            }
+//
+//            if (!soDanh.matches("\\d{2}")) {
+//                dto.setTrung(false);
+//                dto.setTienTrung(0);
+//                dto.setSaiLyDo(List.of("Số đánh không hợp lệ (phải là 2 chữ số)"));
+//                return dto;
+//            }
+//
+//            String soChuan = chuanHoa(soDanh);
+//            String mienChuan = chuanHoa(mien);
+//            List<String> saiLyDo = new ArrayList<>();
+//
+//            if (mienChuan.equals("MIENBAC")) {
+//                var ketQua = bacRepo.findAllByNgay(ngay).stream()
+//
+//                        .filter(kq -> kq.getGiai() != null && "G7".equalsIgnoreCase(kq.getGiai()))
+//
+//                        .toList();
+//
+//                Set<String> tatCaDai = new HashSet<>();
+//                for (var kq : ketQua) {
+//                    tatCaDai.add(kq.getTenDai());
+//
+//                    // So sánh trực tiếp từng dòng G7 – mỗi dòng là 1 cặp số như "78"
+//                    if (soChuan.equals(chuanHoa(kq.getSoTrung()))) {
+//                        dto.setTrung(true);
+//                        dto.setGiaiTrung("Giải 7");
+//                        dto.setTenDai(kq.getTenDai());
+//                        dto.setCachTrung("Trúng ĐẦU MIỀN BẮC – Đài " + kq.getTenDai());
+//                        dto.setTienTrung(Double.parseDouble(tienDanh) * 1000);
+//                        dto.setDanhSachDai(List.copyOf(tatCaDai));
+//                        return dto;
+//                    }
+//                }
+//
+//                dto.setTrung(false);
+//                dto.setTienTrung(0);
+//                dto.setSaiLyDo(List.of("Không trúng ĐẦU MIỀN BẮC – Giải 7"));
+//                dto.setDanhSachDai(List.copyOf(tatCaDai));
+//                return dto;
+//            }
+//
+//            if (mienChuan.equals("MIENTRUNG")) {
+//                var ketQua = trungRepo.findAllByNgay(ngay).stream()
+//                        .filter(kq -> kq.getGiai() != null && "G8".equalsIgnoreCase(kq.getGiai()))
+//                        .toList();
+//                for (var kq : ketQua) {
+//                    dto.getDanhSachDai().add(kq.getTenDai());
+//                    if (soChuan.equals(chuanHoa(kq.getSoTrung()))) {
+//                        dto.setTrung(true);
+//                        dto.setGiaiTrung("Giải 8");
+//                        dto.setTenDai(kq.getTenDai());
+//                        dto.setCachTrung("Trúng ĐẦU MIỀN TRUNG – Đài " + kq.getTenDai());
+//                        dto.setTienTrung(Double.parseDouble(tienDanh) * 1000);
+//                        return dto;
+//                    } else {
+//                        saiLyDo.add("Trật đài " + kq.getTenDai());
+//                    }
+//                }
+//            }
+//
+//            if (mienChuan.equals("MIENNAM")) {
+//                var ketQua = namRepo.findAllByNgay(ngay).stream()
+//
+//                        .filter(kq -> kq.getGiai() != null && "G8".equalsIgnoreCase(kq.getGiai()))
+//                        .toList();
+//
+//
+//                for (var kq : ketQua) {
+//                    dto.getDanhSachDai().add(kq.getTenDai());
+//                    if (soChuan.equals(chuanHoa(kq.getSoTrung()))) {
+//                        dto.setTrung(true);
+//                        dto.setGiaiTrung("Giải 8");
+//                        dto.setTenDai(kq.getTenDai());
+//                        dto.setCachTrung("Trúng ĐẦU MIỀN NAM – Đài " + kq.getTenDai());
+//                        dto.setTienTrung(Double.parseDouble(tienDanh) * 1000);
+//                        return dto;
+//                    } else {
+//                        saiLyDo.add("Trật đài " + kq.getTenDai());
+//                    }
+//                }
+//            }
+//
+//            dto.setTrung(false);
+//            dto.setTienTrung(0);
+//            dto.setSaiLyDo(saiLyDo.isEmpty() ? List.of("Không trúng số nào") : saiLyDo);
+//            return dto;
+//        }
+//
 
-    import com.example.doxoso.model.DoiChieuKetQuaDto;
-    import com.example.doxoso.repository.KetQuaMienBacRepository;
-    import com.example.doxoso.repository.KetQuaMienTrungRepository;
-    import com.example.doxoso.repository.KetQuaMienNamRepository;
-    import org.springframework.beans.factory.annotation.Autowired;
-    import org.springframework.stereotype.Service;
-    import java.text.Normalizer;
-    import java.time.DayOfWeek;
-    import java.time.LocalDate;
-    import java.util.*;
+//            public DoiChieuKetQuaDto xuLyDau(String soDanh, String mien, LocalDate ngay, String tienDanh, String tenDai) {
+//                DoiChieuKetQuaDto dto = new DoiChieuKetQuaDto();
+//                dto.setSoDanh(soDanh);
+//                dto.setTenDai(tenDai);
+//                dto.setMien(mien);
+//                dto.setNgay(ngay);
+//                dto.setThu(chuyenNgaySangThu(ngay));
+//                dto.setCachDanh("DAU");
+//                dto.setTienDanh(tienDanh);
+//                dto.setDanhSachDai(new ArrayList<>());
+//
+//                // Kiểm tra đầu vào
+//                if (soDanh == null || tienDanh == null) {
+//                    dto.setTrung(false);
+//                    dto.setTienTrung(0.0);
+//                    dto.setSaiLyDo(List.of("Thiếu thông tin bắt buộc (số đánh hoặc tiền đánh)"));
+//                    return dto;
+//                }
+//                if (!soDanh.matches("\\d{2}")) {
+//                    dto.setTrung(false);
+//                    dto.setTienTrung(0.0);
+//                    dto.setSaiLyDo(List.of("Số đánh không hợp lệ (phải là 2 chữ số)"));
+//                    return dto;
+//                }
+//
+//                String soChuan = chuanHoa(soDanh);
+//                String mienChuan = chuanHoa(mien);
+//                List<String> dsDaiTrongNgay = layDanhSachDaiTrongNgay(mienChuan, ngay);
+//
+//                if (dsDaiTrongNgay.isEmpty()) {
+//                    dto.setTrung(false);
+//                    dto.setTienTrung(0.0);
+//                    dto.setSaiLyDo(List.of("Không có đài mở thưởng trong ngày " + ngay));
+//                    return dto;
+//                }
+//
+//                String tenDaiRaw = tenDai == null ? "" : tenDai.trim().toUpperCase();
+//                boolean isNhapDangXDAI = tenDaiRaw.matches("\\d\\s*ĐÀI");
+//                List<String> dsDaiNguoiChoi;
+//                int soDaiThucTe = dsDaiTrongNgay.size();
+//
+//                if (isNhapDangXDAI) {
+//                    int soDaiNguoiNhap = Integer.parseInt(tenDaiRaw.split("\\s")[0]);
+//
+//                    if (soDaiNguoiNhap == soDaiThucTe) {
+//                        dsDaiNguoiChoi = new ArrayList<>(dsDaiTrongNgay);
+//                    } else if (soDaiNguoiNhap < soDaiThucTe) {
+//                        dto.setTrung(false);
+//                        dto.setTienTrung(0.0);
+//                        dto.setSaiLyDo(List.of("Hôm nay có " + soDaiThucTe + " đài, bạn cần ghi rõ tên " + soDaiNguoiNhap + " đài muốn đánh!"));
+//                        return dto;
+//                    } else {
+//                        dto.setTrung(false);
+//                        dto.setTienTrung(0.0);
+//                        dto.setSaiLyDo(List.of("Hôm nay chỉ có " + soDaiThucTe + " đài, bạn không thể đánh " + soDaiNguoiNhap + " đài!"));
+//                        return dto;
+//                    }
+//                } else {
+//                    dsDaiNguoiChoi = Arrays.stream(tenDaiRaw.split("\\s*,\\s*"))
+//                            .filter(s -> !s.isBlank())
+//                            .map(this::chuanHoa)
+//                            .toList();
+//
+//                    if (dsDaiNguoiChoi.isEmpty()) {
+//                        if (soDaiThucTe == 1) {
+//                            dsDaiNguoiChoi = new ArrayList<>(dsDaiTrongNgay);
+//                        } else {
+//                            dto.setTrung(false);
+//                            dto.setTienTrung(0.0);
+//                            dto.setSaiLyDo(List.of("Hôm nay có " + soDaiThucTe + " đài, bạn phải nhập rõ tên đài muốn dò"));
+//                            return dto;
+//                        }
+//                    }
+//                }
+//
+//                // Kiểm tra tên đài hợp lệ
+//                List<String> dsSai = dsDaiNguoiChoi.stream()
+//                        .filter(dai -> !dsDaiTrongNgay.contains(dai))
+//                        .toList();
+//
+//                if (!dsSai.isEmpty()) {
+//                    dto.setTrung(false);
+//                    dto.setTienTrung(0.0);
+//                    dto.setSaiLyDo(List.of(
+//                            "Tên đài không hợp lệ: " + String.join(", ", dsSai),
+//                            "Các đài hợp lệ hôm nay: " + String.join(", ", dsDaiTrongNgay)
+//                    ));
+//                    return dto;
+//                }
+//
+//                if (dsDaiNguoiChoi.size() < dsDaiTrongNgay.size()) {
+//                    dto.setGhiChu("Bạn chỉ dò một phần đài hôm nay. Đã chọn: " + String.join(", ", dsDaiNguoiChoi));
+//                }
+//
+//                boolean trung = false;
+//                String giaiTrung = "";
+//                String tenDaiTrung = "";
+//                List<String> danhSachDaiHopLe = new ArrayList<>();
+//
+//                for (String tenDaiChuan : dsDaiNguoiChoi) {
+//                    if (mienChuan.equals("MIENBAC")) {
+//                        var ketQua = bacRepo.findAllByNgay(ngay).stream()
+//                                .filter(kq -> "G7".equalsIgnoreCase(kq.getGiai()) && chuanHoa(kq.getTenDai()).equals(tenDaiChuan))
+//                                .toList();
+//                        for (var kq : ketQua) {
+//                            danhSachDaiHopLe.add(kq.getTenDai());
+//                            if (soChuan.equals(chuanHoa(kq.getSoTrung()))) {
+//                                trung = true;
+//                                giaiTrung = "Giải 7";
+//                                tenDaiTrung = kq.getTenDai();
+//                                break;
+//                            }
+//                        }
+//                    } else if (mienChuan.equals("MIENTRUNG")) {
+//                        var ketQua = trungRepo.findAllByNgay(ngay).stream()
+//                                .filter(kq -> "G8".equalsIgnoreCase(kq.getGiai()) && chuanHoa(kq.getTenDai()).equals(tenDaiChuan))
+//                                .toList();
+//                        for (var kq : ketQua) {
+//                            danhSachDaiHopLe.add(kq.getTenDai());
+//                            if (soChuan.equals(chuanHoa(kq.getSoTrung()))) {
+//                                trung = true;
+//                                giaiTrung = "Giải 8";
+//                                tenDaiTrung = kq.getTenDai();
+//                                break;
+//                            }
+//                        }
+//                    } else if (mienChuan.equals("MIENNAM")) {
+//                        var ketQua = namRepo.findAllByNgay(ngay).stream()
+//                                .filter(kq -> "G8".equalsIgnoreCase(kq.getGiai()) && chuanHoa(kq.getTenDai()).equals(tenDaiChuan))
+//                                .toList();
+//                        for (var kq : ketQua) {
+//                            danhSachDaiHopLe.add(kq.getTenDai());
+//                            if (soChuan.equals(chuanHoa(kq.getSoTrung()))) {
+//                                trung = true;
+//                                giaiTrung = "Giải 8";
+//                                tenDaiTrung = kq.getTenDai();
+//                                break;
+//                            }
+//                        }
+//                    }
+//                }
+//
+//                dto.setDanhSachDai(danhSachDaiHopLe);
+//                dto.setTrung(trung);
+//                if (trung) {
+//                    dto.setGiaiTrung(giaiTrung);
+//                    dto.setTenDai(tenDaiTrung);
+//                    dto.setCachTrung("Trúng ĐẦU – Đài " + tenDaiTrung);
+//                    try {
+//                        dto.setTienTrung(Double.parseDouble(tienDanh) * 1000);
+//                    } catch (Exception e) {
+//                        dto.setTienTrung(0.0);
+//                        dto.setSaiLyDo(List.of("Tiền đánh không hợp lệ"));
+//                    }
+//                } else {
+//                    dto.setTienTrung(0.0);
+//                    dto.setSaiLyDo(List.of("Không trúng ở các đài đã chọn"));
+//                }
+//
+//                return dto;
+//            }
+//
+//            private String chuanHoa(String input) {
+//                if (input == null) return "";
+//                return Normalizer.normalize(input.trim().toUpperCase(), Normalizer.Form.NFD)
+//                        .replaceAll("\\p{M}", "") // bỏ dấu tiếng Việt
+//                        .replaceAll("\\s+", " ")  // gọn khoảng trắng
+//                        .trim();
+//            }
+//
+//        private List<String> layDanhSachDaiTrongNgay(String mien, LocalDate ngay) {
+//            LichQuayXoSo lich = lichQuayXoSoService.traCuuTheoNgay(ngay);
+//            Map<String, List<String>> danhSachDai = lich.getDanhSachDai(); // đúng tên field
+//
+//            String mienChuan = chuanHoa(mien);
+//
+//            return danhSachDai.entrySet().stream()
+//                    .filter(entry -> chuanHoa(entry.getKey()).equals(mienChuan))
+//                    .flatMap(entry -> entry.getValue().stream())
+//                    .map(this::chuanHoa)
+//                    .distinct()
+//                    .toList();
+//        }
+//
+//
+//        private String chuyenNgaySangThu(LocalDate ngay) {
+//                // Tuỳ bạn viết logic chuyển ngày sang thứ
+//                return ngay.getDayOfWeek().toString();
+//            }
+//        }
 
-    @Service
-    public class DauService {
-
-        @Autowired
-        private KetQuaMienBacRepository bacRepo;
-
-        @Autowired
-        private KetQuaMienTrungRepository trungRepo;
-
-        @Autowired
-        private KetQuaMienNamRepository namRepo;
-
-        public DoiChieuKetQuaDto xuLyDau(String soDanh, String mien, LocalDate ngay, String tienDanh) {
-            DoiChieuKetQuaDto dto = new DoiChieuKetQuaDto();
-            dto.setSoDanh(soDanh);
-            dto.setMien(mien);
-            dto.setNgay(ngay);
-            dto.setThu(chuyenNgaySangThu(ngay));
-            dto.setCachDanh("DAU");
-            dto.setTienDanh(tienDanh);
-            dto.setDanhSachDai(new ArrayList<>());
-
-            if (tienDanh == null) {
-                dto.setTrung(false);
-                dto.setTienTrung(0);
-                dto.setSaiLyDo(List.of("Thiếu tiền đánh"));
-                return dto;
-            }
-
-            if (!soDanh.matches("\\d{2}")) {
-                dto.setTrung(false);
-                dto.setTienTrung(0);
-                dto.setSaiLyDo(List.of("Số đánh không hợp lệ (phải là 2 chữ số)"));
-                return dto;
-            }
-
-            String soChuan = chuanHoa(soDanh);
-            String mienChuan = chuanHoa(mien);
-            List<String> saiLyDo = new ArrayList<>();
-
-            if (mienChuan.equals("MIENBAC")) {
-                var ketQua = bacRepo.findAllByNgay(ngay).stream()
-
-                        .filter(kq -> kq.getGiai() != null && "G7".equalsIgnoreCase(kq.getGiai()))
-
-                        .toList();
-
-                Set<String> tatCaDai = new HashSet<>();
-                for (var kq : ketQua) {
-                    tatCaDai.add(kq.getTenDai());
-
-                    // So sánh trực tiếp từng dòng G7 – mỗi dòng là 1 cặp số như "78"
-                    if (soChuan.equals(chuanHoa(kq.getSoTrung()))) {
-                        dto.setTrung(true);
-                        dto.setGiaiTrung("Giải 7");
-                        dto.setTenDai(kq.getTenDai());
-                        dto.setCachTrung("Trúng ĐẦU MIỀN BẮC – Đài " + kq.getTenDai());
-                        dto.setTienTrung(Double.parseDouble(tienDanh) * 1000);
-                        dto.setDanhSachDai(List.copyOf(tatCaDai));
-                        return dto;
-                    }
-                }
-
-                dto.setTrung(false);
-                dto.setTienTrung(0);
-                dto.setSaiLyDo(List.of("Không trúng ĐẦU MIỀN BẮC – Giải 7"));
-                dto.setDanhSachDai(List.copyOf(tatCaDai));
-                return dto;
-            }
-
-            if (mienChuan.equals("MIENTRUNG")) {
-                var ketQua = trungRepo.findAllByNgay(ngay).stream()
-                        .filter(kq -> kq.getGiai() != null && "G8".equalsIgnoreCase(kq.getGiai()))
-                        .toList();
-                for (var kq : ketQua) {
-                    dto.getDanhSachDai().add(kq.getTenDai());
-                    if (soChuan.equals(chuanHoa(kq.getSoTrung()))) {
-                        dto.setTrung(true);
-                        dto.setGiaiTrung("Giải 8");
-                        dto.setTenDai(kq.getTenDai());
-                        dto.setCachTrung("Trúng ĐẦU MIỀN TRUNG – Đài " + kq.getTenDai());
-                        dto.setTienTrung(Double.parseDouble(tienDanh) * 1000);
-                        return dto;
-                    } else {
-                        saiLyDo.add("Trật đài " + kq.getTenDai());
-                    }
-                }
-            }
-
-            if (mienChuan.equals("MIENNAM")) {
-                var ketQua = namRepo.findAllByNgay(ngay).stream()
-
-                        .filter(kq -> kq.getGiai() != null && "G8".equalsIgnoreCase(kq.getGiai()))
-                        .toList();
-
-
-                for (var kq : ketQua) {
-                    dto.getDanhSachDai().add(kq.getTenDai());
-                    if (soChuan.equals(chuanHoa(kq.getSoTrung()))) {
-                        dto.setTrung(true);
-                        dto.setGiaiTrung("Giải 8");
-                        dto.setTenDai(kq.getTenDai());
-                        dto.setCachTrung("Trúng ĐẦU MIỀN NAM – Đài " + kq.getTenDai());
-                        dto.setTienTrung(Double.parseDouble(tienDanh) * 1000);
-                        return dto;
-                    } else {
-                        saiLyDo.add("Trật đài " + kq.getTenDai());
-                    }
-                }
-            }
-
-            dto.setTrung(false);
-            dto.setTienTrung(0);
-            dto.setSaiLyDo(saiLyDo.isEmpty() ? List.of("Không trúng số nào") : saiLyDo);
-            return dto;
-        }
 
 
 
 
 
-        public boolean laCachDanh(String cachDanhChuanHoa) {
-            return cachDanhChuanHoa != null && cachDanhChuanHoa.contains("DAU");
-        }
 
-        private String chuyenNgaySangThu(LocalDate ngay) {
-            DayOfWeek day = ngay.getDayOfWeek();
-            return switch (day) {
-                case MONDAY -> "Thứ Hai";
-                case TUESDAY -> "Thứ Ba";
-                case WEDNESDAY -> "Thứ Tư";
-                case THURSDAY -> "Thứ Năm";
-                case FRIDAY -> "Thứ Sáu";
-                case SATURDAY -> "Thứ Bảy";
-                case SUNDAY -> "Chủ Nhật";
-            };
-        }
 
-            private String chuanHoa(String input) {
-                if (input == null) return "";
-                return Normalizer.normalize(input, Normalizer.Form.NFD)
-                        .replaceAll("đ", "d")
-                        .replaceAll("Đ", "D")
-                        .replaceAll("\\p{M}", "")
-                        .toUpperCase()
-                        .trim()
-                        .replaceAll("\\s+", "");
-            }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 //        private List<String> laySoTrungTheoGiaiVaDai(LocalDate ngay, String tenGiai, String tenDaiChuan, String mienChuan) {
@@ -183,6 +345,509 @@
 //
 //                default -> List.of();
 //            };
-//        }
+//
 
+package com.example.doxoso.service;
+
+import com.example.doxoso.model.DoiChieuKetQuaDto;
+import com.example.doxoso.repository.KetQuaMienBacRepository;
+import com.example.doxoso.repository.KetQuaMienNamRepository;
+import com.example.doxoso.repository.KetQuaMienTrungRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.text.Normalizer;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
+
+@Service
+public class DauService {
+
+    @Autowired
+    private KetQuaMienBacRepository bacRepo;
+
+    @Autowired
+    private KetQuaMienTrungRepository trungRepo;
+
+    @Autowired
+    private KetQuaMienNamRepository namRepo;
+
+    @Autowired
+    private TinhTienService tinhTienService;
+
+    public DoiChieuKetQuaDto xuLyDau(String soDanh, String mien, LocalDate ngay, String tienDanh, String tenDai) {
+        DoiChieuKetQuaDto dto = new DoiChieuKetQuaDto();
+        dto.setSoDanh(soDanh);
+        dto.setTenDai(tenDai.trim());
+        dto.setMien(mien);
+        dto.setNgay(ngay);
+        dto.setThu(chuyenNgaySangThu(ngay));
+        dto.setCachDanh("ĐẦU");
+        dto.setCachTrung("ĐẦU");
+        dto.setTienDanh(tienDanh);
+
+        // Validate cơ bản
+        if (soDanh == null || tienDanh == null) {
+            dto.setTrung(false);
+            dto.setTienTrung(0.0);
+            dto.setSaiLyDo(List.of("Thiếu thông tin bắt buộc (số đánh hoặc tiền đánh)"));
+            return dto;
+        }
+        if (!soDanh.matches("\\d{2}")) {
+            dto.setTrung(false);
+            dto.setTienTrung(0.0);
+            dto.setSaiLyDo(List.of("Số đánh không hợp lệ (phải là 2 chữ số)"));
+            return dto;
+        }
+        if (tenDai == null || tenDai.isBlank()) {
+            dto.setTrung(false);
+            dto.setTienTrung(0.0);
+            dto.setSaiLyDo(List.of("Bạn phải nhập tên đài muốn dò"));
+            return dto;
+        }
+
+        List<String> dsDaiTrongNgay = layDanhSachDaiCoDauTrongNgay(mien, ngay);
+        if (dsDaiTrongNgay.isEmpty()) {
+            dto.setTrung(false);
+            dto.setTienTrung(0.0);
+            dto.setSaiLyDo(List.of("Không có đài mở thưởng trong ngày " + ngay));
+            return dto;
+        }
+
+        // Xác định danh sách đài người chơi chọn
+        List<String> dsDaiNguoiChoi;
+        String tenDaiNormalized = tenDai.trim().toUpperCase();
+        if (tenDaiNormalized.matches("\\d+\\s*ĐÀI")) {
+            int soDaiNguoiNhap = Integer.parseInt(tenDaiNormalized.split("\\s+")[0]);
+            if (soDaiNguoiNhap == dsDaiTrongNgay.size()) {
+                dsDaiNguoiChoi = new ArrayList<>(dsDaiTrongNgay);
+            } else {
+                dto.setTrung(false);
+                dto.setTienTrung(0.0);
+                dto.setSaiLyDo(List.of("Số đài nhập (" + soDaiNguoiNhap + ") không khớp với số đài mở thưởng trong ngày (" + dsDaiTrongNgay.size() + ")"));
+                dto.setDanhSachDai(dsDaiTrongNgay);
+                return dto;
+            }
+        } else {
+            dsDaiNguoiChoi = Arrays.stream(tenDai.split(","))
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .collect(Collectors.toList());
+
+            List<String> dsSai = dsDaiNguoiChoi.stream()
+                    .filter(dai -> dsDaiTrongNgay.stream().noneMatch(d -> d.equalsIgnoreCase(dai)))
+                    .collect(Collectors.toList());
+
+            if (!dsSai.isEmpty()) {
+                dto.setTrung(false);
+                dto.setTienTrung(0.0);
+                dto.setSaiLyDo(List.of("Tên đài không hợp lệ: " + String.join(", ", dsSai)));
+                dto.setDanhSachDai(dsDaiTrongNgay);
+                return dto;
+            }
+        }
+
+        // Chuyển tiền đánh
+        double tienDanhDouble;
+        try {
+            tienDanhDouble = Double.parseDouble(tienDanh);
+        } catch (NumberFormatException e) {
+            dto.setTrung(false);
+            dto.setTienTrung(0.0);
+            dto.setSaiLyDo(List.of("Tiền đánh không hợp lệ"));
+            return dto;
+        }
+
+        double tienDanhMoiDai = tienDanhDouble / dsDaiNguoiChoi.size();
+        AtomicBoolean daTrung = new AtomicBoolean(false);
+        double[] tongTienTrung = {0.0};
+
+        // Xử lý từng đài
+        List<DoiChieuKetQuaDto.KetQuaTheoDai> ketQuaTungDaiList = dsDaiNguoiChoi.stream().map(daiNguoiChoi -> {
+            DoiChieuKetQuaDto.KetQuaTheoDai ketQuaDai = new DoiChieuKetQuaDto.KetQuaTheoDai();
+            ketQuaDai.setTenDai(daiNguoiChoi);
+            ketQuaDai.setMien(mien);
+
+            List<?> ketQuaDaiHienTai = getKetQuaTheoDaiVaNgay(mien, daiNguoiChoi, ngay);
+
+            List<String> giaiTrung = ketQuaDaiHienTai.stream()
+                    .filter(kq -> {
+                        String soTrung = (String) getField(kq, "getSoTrung");
+                        return soTrung != null && soTrung.length() >= 2 &&
+                                soTrung.startsWith(soDanh);
+                    })
+                    .map(kq -> (String) getField(kq, "getGiai"))
+                    .distinct()
+                    .collect(Collectors.toList());
+
+            if (!giaiTrung.isEmpty()) {
+                ketQuaDai.setTrung(true);
+                ketQuaDai.setGiaiTrung(giaiTrung);
+                ketQuaDai.setSoTrung(soDanh);
+                ketQuaDai.setSoLanTrung(giaiTrung.size());
+//tính tiền
+                double tienTrungDai = tinhTienService.tinhTienDau(true, mien, tienDanhMoiDai) * ketQuaDai.getSoLanTrung();
+
+
+
+
+                ketQuaDai.setTienTrung(tienTrungDai);
+
+                tongTienTrung[0] += tienTrungDai;
+                daTrung.set(true);
+            } else {
+                ketQuaDai.setTrung(false);
+                ketQuaDai.setTienTrung(0.0);
+                ketQuaDai.setLyDo("Không có số trúng " + soDanh);
+                ketQuaDai.setSoLanTrung(0);
+            }
+
+            return ketQuaDai;
+        }).collect(Collectors.toList());
+
+        // Set dữ liệu cuối cùng
+        dto.setTrung(daTrung.get());
+        dto.setTienTrung(tongTienTrung[0]);
+        dto.setDanhSachDai(dsDaiNguoiChoi);
+        dto.setKetQuaTungDai(ketQuaTungDaiList);
+
+        return dto;
     }
+
+    private List<String> layDanhSachDaiCoDauTrongNgay(String mien, LocalDate ngay) {
+        switch (mien) {
+            case "MIỀN BẮC":
+                return bacRepo.findAllByNgay(ngay).stream()
+                        .map(kq -> kq.getTenDai().trim())
+                        .distinct()
+                        .toList();
+            case "MIỀN TRUNG":
+                return trungRepo.findAllByNgay(ngay).stream()
+                        .map(kq -> kq.getTenDai().trim())
+                        .distinct()
+                        .toList();
+            case "MIỀN NAM":
+                return namRepo.findAllByNgay(ngay).stream()
+                        .map(kq -> kq.getTenDai().trim())
+                        .distinct()
+                        .toList();
+            default:
+                return Collections.emptyList();
+        }
+    }
+
+
+    private List<?> getKetQuaTheoDaiVaNgay(String mien, String tenDai, LocalDate ngay) {
+        switch (mien) {
+            case "MIỀN BẮC":
+                return bacRepo.findAllByNgay(ngay).stream()
+                        .filter(kq -> chuanHoa(kq.getTenDai()).equals(chuanHoa(tenDai)))
+                        .toList();
+            case "MIỀN TRUNG":
+                return trungRepo.findAllByNgay(ngay).stream()
+                        .filter(kq -> chuanHoa(kq.getTenDai()).equals(chuanHoa(tenDai)))
+                        .toList();
+            case "MIỀN NAM":
+                return namRepo.findAllByNgay(ngay).stream()
+                        .filter(kq -> chuanHoa(kq.getTenDai()).equals(chuanHoa(tenDai)))
+                        .toList();
+            default:
+                return Collections.emptyList();
+        }
+    }
+
+
+    private String chuyenNgaySangThu(LocalDate ngay) {
+        DayOfWeek day = ngay.getDayOfWeek();
+        return switch (day) {
+            case MONDAY -> "Thứ Hai";
+            case TUESDAY -> "Thứ Ba";
+            case WEDNESDAY -> "Thứ Tư";
+            case THURSDAY -> "Thứ Năm";
+            case FRIDAY -> "Thứ Sáu";
+            case SATURDAY -> "Thứ Bảy";
+            case SUNDAY -> "Chủ Nhật";
+        };
+    }
+
+    private String chuanHoa(String input) {
+        if (input == null) return "";
+        return Normalizer.normalize(input, Normalizer.Form.NFD)
+                .replaceAll("đ", "d")
+                .replaceAll("Đ", "D")
+                .replaceAll("\\p{M}", "")
+                .toUpperCase()
+                .trim()
+                .replaceAll("\\s+", "");
+    }
+
+    private <T> T getField(Object obj, String methodName) {
+        try {
+            return (T) obj.getClass().getMethod(methodName).invoke(obj);
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi phản xạ khi lấy field: " + methodName, e);
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//    public DoiChieuKetQuaDto xuLyDau(String soDanh, String mien, LocalDate ngay, String tienDanh, String tenDai) {
+//        DoiChieuKetQuaDto dto = new DoiChieuKetQuaDto();
+//        dto.setSoDanh(soDanh);
+//        dto.setMien(mien);
+//        dto.setNgay(ngay);
+//        dto.setThu(chuyenNgaySangThu(ngay));
+//        dto.setCachDanh("DAU");
+//        dto.setTienDanh(tienDanh);
+//
+//        // Validate số đánh
+//        if (soDanh == null || !soDanh.matches("\\d{2}")) {
+//            dto.setTrung(false);
+//            dto.setTienTrung(0.0);
+//            dto.setSaiLyDo(List.of("Số đánh không hợp lệ (phải là 2 chữ số)"));
+//            return dto;
+//        }
+//
+//        // Chuẩn hóa miền và tên đài
+//        String mienChuan = chuanHoa(mien);
+//        String soChuan = chuanHoa(soDanh);
+//        String tenDaiRaw = tenDai == null ? "" : tenDai.trim().toUpperCase();
+//
+//        // Lấy kết quả tổng hợp theo miền và ngày
+//        List<Object> ketQuaTongHop = new ArrayList<>();
+//        switch (mienChuan) {
+//            case "MIENBAC" -> ketQuaTongHop.addAll(bacRepo.findAllByNgay(ngay));
+//            case "MIENTRUNG" -> ketQuaTongHop.addAll(trungRepo.findAllByNgay(ngay));
+//            case "MIENNAM" -> ketQuaTongHop.addAll(namRepo.findAllByNgay(ngay));
+//            default -> {
+//                dto.setTrung(false);
+//                dto.setTienTrung(0.0);
+//                dto.setSaiLyDo(List.of("Miền không hợp lệ"));
+//                return dto;
+//            }
+//        }
+//
+//        // Lấy danh sách đài mở trong ngày theo miền (chuẩn hóa tên đài)
+//        Set<String> dsDaiTrongNgay = ketQuaTongHop.stream()
+//                .map(kq -> (String) getField(kq, "getTenDai"))
+//                .filter(Objects::nonNull)
+//                .map(String::toUpperCase)
+//                .map(String::trim)
+//                .map(this::chuanHoa)
+//                .collect(Collectors.toSet());
+//
+//        // Xử lý tên đài người chơi nhập
+//        List<String> dsDaiNguoiChoi;
+//        boolean isNhapDangXDAI = tenDaiRaw.matches("\\d\\s*ĐÀI"); // vd: "3 ĐÀI"
+//
+//        if (isNhapDangXDAI) {
+//            int soDaiNguoiNhap = Integer.parseInt(tenDaiRaw.split("\\s")[0]);
+//            int soDaiThucTe = dsDaiTrongNgay.size();
+//
+//            if (soDaiNguoiNhap == soDaiThucTe) {
+//                dsDaiNguoiChoi = new ArrayList<>(dsDaiTrongNgay);
+//            } else if (soDaiNguoiNhap < soDaiThucTe) {
+//                dto.setTrung(false);
+//                dto.setTienTrung(0.0);
+//                dto.setSaiLyDo(List.of("Hôm nay có " + soDaiThucTe + " đài, bạn cần ghi rõ tên " + soDaiNguoiNhap + " đài muốn đánh!"));
+//                return dto;
+//            } else {
+//                dto.setTrung(false);
+//                dto.setTienTrung(0.0);
+//                dto.setSaiLyDo(List.of("Hôm nay chỉ có " + soDaiThucTe + " đài, bạn không thể đánh " + soDaiNguoiNhap + " đài!"));
+//                return dto;
+//            }
+//        } else {
+//            // Tách danh sách đài người chơi nhập, chuẩn hóa từng đài
+//            dsDaiNguoiChoi = Arrays.stream(tenDaiRaw.split("\\s*,\\s*"))
+//                    .filter(s -> !s.isBlank())
+//                    .map(this::chuanHoa)
+//                    .toList();
+//
+//            if (dsDaiNguoiChoi.isEmpty()) {
+//                if (dsDaiTrongNgay.size() == 1) {
+//                    dsDaiNguoiChoi = new ArrayList<>(dsDaiTrongNgay);
+//                } else {
+//                    dto.setTrung(false);
+//                    dto.setTienTrung(0.0);
+//                    dto.setSaiLyDo(List.of("Bạn phải nhập tên đài muốn dò"));
+//                    return dto;
+//                }
+//            }
+//        }
+//
+//        // Kiểm tra tên đài nhập có hợp lệ
+//        List<String> dsSai = dsDaiNguoiChoi.stream()
+//                .filter(dai -> !dsDaiTrongNgay.contains(dai))
+//                .toList();
+//
+//        if (!dsSai.isEmpty()) {
+//            dto.setTrung(false);
+//            dto.setTienTrung(0.0);
+//            dto.setSaiLyDo(List.of(
+//                    "Tên đài không hợp lệ: " + String.join(", ", dsSai),
+//                    "Các đài hợp lệ hôm nay: " + String.join(", ", dsDaiTrongNgay)
+//            ));
+//            return dto;
+//        }
+//
+//        // Dò số trên từng đài người chơi nhập
+//        List<DoiChieuKetQuaDto.KetQuaTheoDai> danhSachKetQua = dsDaiNguoiChoi.stream().map(tenDaiChuan -> {
+//            DoiChieuKetQuaDto.KetQuaTheoDai ketQuaDai = new DoiChieuKetQuaDto.KetQuaTheoDai();
+//            ketQuaDai.setTenDai(tenDaiChuan);
+//            ketQuaDai.setMien(mien);
+//
+//            List<String> giaiTrung = ketQuaTongHop.stream()
+//                    .filter(kq -> tenDaiChuan.equalsIgnoreCase(chuanHoa((String) getField(kq, "getTenDai"))))
+//                    .filter(kq -> {
+//                        String soTrung = (String) getField(kq, "getSoTrung");
+//                        if (soTrung != null && soTrung.length() >= 2) {
+//                            return soChuan.equals(chuanHoa(soTrung));
+//                        }
+//                        return false;
+//                    })
+//                    .map(kq -> (String) getField(kq, "getGiai"))
+//                    .distinct()
+//                    .toList();
+//
+//            if (!giaiTrung.isEmpty()) {
+//                ketQuaDai.setTrung(true);
+//                ketQuaDai.setGiaiTrung(giaiTrung);
+//                ketQuaDai.setSoTrung(soChuan);
+//                ketQuaDai.setSoLanTrung(giaiTrung.size());
+//                // Tính tiền trúng từng đài nếu cần, ví dụ tạm set 0 ở đây (hoặc gọi tính tiền theo từng đài)
+//                ketQuaDai.setTienTrung(0);
+//            } else {
+//                ketQuaDai.setTrung(false);
+//                ketQuaDai.setLyDo("Không có số trúng " + soChuan);
+//                ketQuaDai.setSoLanTrung(0);
+//                ketQuaDai.setTienTrung(0);
+//            }
+//
+//            return ketQuaDai;
+//        }).toList();
+//
+//        // Tổng hợp trạng thái trúng
+//        boolean trung = danhSachKetQua.stream().anyMatch(DoiChieuKetQuaDto.KetQuaTheoDai::isTrung);
+//        dto.setTrung(trung);
+//        dto.setKetQuaTungDai(danhSachKetQua);
+//        dto.setDanhSachDai(dsDaiNguoiChoi);
+//
+//        // Tính tổng tiền trúng (gọi dịch vụ tính tiền)
+//        if (trung) {
+//            try {
+//                double tienDanhDouble = Double.parseDouble(tienDanh);
+//                double tongTienTrung = tinhTienService.tinhTienDau(true, mien, tienDanhDouble);
+//                dto.setTienTrung(tongTienTrung);
+//                // Bạn có thể muốn phân bổ tiền trúng chi tiết cho từng đài trong danhSachKetQua ở đây
+//            } catch (NumberFormatException e) {
+//                dto.setTienTrung(0.0);
+//                dto.setSaiLyDo(List.of("Tiền đánh không hợp lệ"));
+//            }
+//        } else {
+//            dto.setTienTrung(0.0);
+//            dto.setSaiLyDo(List.of("Không trúng ở các đài đã chọn"));
+//        }
+//
+//        return dto;
+//    }
+//
+//
+//    private List<?> getKetQuaTheoDaiVaNgay(String mien, String tenDai, LocalDate ngay) {
+//        switch (mien) {
+//            case "MIỀN BẮC":
+//                return bacRepo.findAllByNgay(ngay).stream()
+//                        .filter(kq -> chuanHoa(kq.getTenDai()).equals(chuanHoa(tenDai)))
+//                        .toList();
+//            case "MIỀN TRUNG":
+//                return trungRepo.findAllByNgay(ngay).stream()
+//                        .filter(kq -> chuanHoa(kq.getTenDai()).equals(chuanHoa(tenDai)))
+//                        .toList();
+//            case "MIỀN NAM":
+//                return namRepo.findAllByNgay(ngay).stream()
+//                        .filter(kq -> chuanHoa(kq.getTenDai()).equals(chuanHoa(tenDai)))
+//                        .toList();
+//            default:
+//                return Collections.emptyList();
+//        }
+//    }
+//
+//
+//    private List<String> layDanhSachDaiCoDauTrongNgay(String mien, LocalDate ngay) {
+//        switch (mien) {
+//            case "MIỀN BẮC":
+//                return bacRepo.findAllByNgay(ngay).stream()
+//                        .map(kq -> kq.getTenDai().trim())
+//                        .distinct()
+//                        .toList();
+//            case "MIỀN TRUNG":
+//                return trungRepo.findAllByNgay(ngay).stream()
+//                        .map(kq -> kq.getTenDai().trim())
+//                        .distinct()
+//                        .toList();
+//            case "MIỀN NAM":
+//                return namRepo.findAllByNgay(ngay).stream()
+//                        .map(kq -> kq.getTenDai().trim())
+//                        .distinct()
+//                        .toList();
+//            default:
+//                return Collections.emptyList();
+//        }
+//    }
+//
+//    private String chuyenNgaySangThu(LocalDate ngay) {
+//            DayOfWeek day = ngay.getDayOfWeek();
+//            return switch (day) {
+//                case MONDAY -> "Thứ Hai";
+//                case TUESDAY -> "Thứ Ba";
+//                case WEDNESDAY -> "Thứ Tư";
+//                case THURSDAY -> "Thứ Năm";
+//                case FRIDAY -> "Thứ Sáu";
+//                case SATURDAY -> "Thứ Bảy";
+//                case SUNDAY -> "Chủ Nhật";
+//            };
+//        }
+//
+//            private String chuanHoa(String input) {
+//                if (input == null) return "";
+//                return Normalizer.normalize(input, Normalizer.Form.NFD)
+//                        .replaceAll("đ", "d")
+//                        .replaceAll("Đ", "D")
+//                        .replaceAll("\\p{M}", "")
+//                        .toUpperCase()
+//                        .trim()
+//                        .replaceAll("\\s+", "");
+//            }
+//    private <T> T getField(Object obj, String methodName) {
+//        try {
+//            return (T) obj.getClass().getMethod(methodName).invoke(obj);
+//        } catch (Exception e) {
+//            throw new RuntimeException("Lỗi phản xạ khi lấy field: " + methodName);
+//        }
+//    }
+//
+//}

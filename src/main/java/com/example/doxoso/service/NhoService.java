@@ -31,7 +31,8 @@ public class NhoService {
 
         if (tienDanh == null || tienDanh.isBlank()) {
             dto.setTrung(false);
-            dto.setTienTrung(0);
+            dto.setTienTrung(0.0);
+
             dto.setSaiLyDo(List.of("Thiếu tiền đánh"));
             return dto;
         }
@@ -39,7 +40,8 @@ public class NhoService {
         var ketQua = timKetQuaTheoMien(mien, tenDai, ngay);
         if (ketQua == null || !ketQua.matches("\\d{6}")) {
             dto.setTrung(false);
-            dto.setTienTrung(0);
+            dto.setTienTrung(0.0);
+
             dto.setSaiLyDo(List.of("Giải ĐB không hợp lệ: " + ketQua));
             return dto;
         }
@@ -54,7 +56,8 @@ public class NhoService {
             dto.setCachTrung("Trúng NHỎ – Đuôi: " + so);
             dto.setTienTrung(tinhTienService.tinhTienTrung("NHO", tienDanh, mien));
         } else {
-            dto.setTienTrung(0);
+            dto.setTienTrung(0.0);
+
             dto.setSaiLyDo(List.of("Trật – Đuôi là " + so));
         }
 

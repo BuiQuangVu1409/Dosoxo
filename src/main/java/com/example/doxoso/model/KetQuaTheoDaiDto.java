@@ -9,7 +9,7 @@ public class KetQuaTheoDaiDto {
     private String tenDai;
     private List<GiaiSoDto> ketQua;
 
-    public KetQuaTheoDaiDto() {}
+
 
     public KetQuaTheoDaiDto(String mien, String tenDai, List<? extends Object> danhSachKetQua) {
         this.mien = mien;

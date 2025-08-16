@@ -6,20 +6,18 @@ import com.example.doxoso.repository.KetQuaMienNamRepository;
 import com.example.doxoso.repository.KetQuaMienTrungRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.text.DecimalFormat;
 import java.text.Normalizer;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 
 @Service
 public class KiemTraKetQuaService {
-    @Autowired
-    private KetQuaMienTrungRepository trungRepo;
-    @Autowired
-    private KetQuaMienBacRepository bacRepo;
-    @Autowired
-    private KetQuaMienNamRepository namRepo;
+
     @Autowired
     private TinhTienService tinhTienService;
     @Autowired
@@ -42,6 +40,11 @@ public class KiemTraKetQuaService {
     private LonService lonService;
     @Autowired
     private NhoService nhoService;
+
+
+
+
+
     public DoiChieuKetQuaDto kiemTraSo(SoNguoiChoi so) {
         DoiChieuKetQuaDto dto = new DoiChieuKetQuaDto();
 
@@ -67,35 +70,210 @@ public class KiemTraKetQuaService {
         // 3 chân
         if (cachDanhChuanHoa.equals("3CHAN")) {
             dto.setTienDanh(so.getTienDanh());
-            List<Object> danhSachKetQua = new ArrayList<>();
-            danhSachKetQua.addAll(trungRepo.findAllByNgay(so.getNgay()));
-            danhSachKetQua.addAll(bacRepo.findAllByNgay(so.getNgay()));
-            danhSachKetQua.addAll(namRepo.findAllByNgay(so.getNgay()));
-            baChanService.xuLyBaChan(dto, so.getSoDanh(), so.getTienDanh(), so.getMien(), danhSachKetQua);
-            return dto;
-        }
+            dto.setCachTrung("3 chân");
 
-        // 2 chân
-        if (cachDanhChuanHoa.equals("2CHAN")) {
-            dto.setTienDanh(so.getTienDanh());
-            boolean trung = haiChanService.kiemTraTrung2Chan(so);
-            dto.setCachTrung("2 chân");
-            if (trung) {
+            // Dò chi tiết kết quả 3 chân
+            DoiChieuKetQuaDto ketQuaChiTiet = baChanService.xuLyBaChan(so);
+
+            // Gán kết quả chi tiết từng đài
+            dto.setKetQuaTungDai(ketQuaChiTiet.getKetQuaTungDai());
+
+            // Gán danh sách đài
+            dto.setDanhSachDai(
+                    ketQuaChiTiet.getKetQuaTungDai().stream()
+                            .map(DoiChieuKetQuaDto.KetQuaTheoDai::getTenDai)
+                            .collect(Collectors.toList())
+            );
+
+            // Kiểm tra trúng
+            if (ketQuaChiTiet.isTrung()) {
                 dto.setTrung(true);
-                dto.setGiaiTrung("Trúng 2 chân");
-                // tính tiền ở tính tiền service
-                dto.setTienTrung(
-                        tinhTienService.tinhTienTrung("2CHAN", so.getTienDanh(), so.getMien())
+
+                // ✅ Tính tiền từng miền cho 3 chân (bao lô, thưởng, đặc biệt)
+                double tongTien = 0;
+                double tongBaoLo = 0;
+                double tongThuong = 0;
+                double tongDacBiet = 0;
+
+                for (DoiChieuKetQuaDto.KetQuaTheoDai dai : ketQuaChiTiet.getKetQuaTungDai()) {
+                    if (dai.isTrung()) {
+                        double[] tienTrung = tinhTienService.tinhTien3Chan(
+                                so.getTienDanh(),
+                                dai.getMien(),
+                                dai.getGiaiTrung()
+                        );
+
+                        // ✅ Làm tròn tiền từng đài
+                        dai.setTienTrung((tienTrung[0]));
+
+                        tongTien += tienTrung[0];
+                        tongBaoLo += tienTrung[1];
+                        tongThuong += tienTrung[2];
+                        tongDacBiet += tienTrung[3];
+                    } else {
+                        dai.setTienTrung(0.0);
+                    }
+                }
+
+                // ✅ Gán tiền sau khi làm tròn
+                dto.setTienTrung((tongTien));
+                dto.setTienTrungBaoLo((tongBaoLo));
+                dto.setTienTrungThuong((tongThuong));
+                dto.setTienTrungDacBiet((tongDacBiet));
+
+                // Gán thông tin giải trúng
+                dto.setGiaiTrung(
+                        ketQuaChiTiet.getKetQuaTungDai().stream()
+                                .filter(DoiChieuKetQuaDto.KetQuaTheoDai::isTrung)
+                                .map(dai -> dai.getTenDai() + " (" + dai.getSoLanTrung() + " lần)")
+                                .collect(Collectors.joining(", "))
                 );
 
                 dto.setSaiLyDo(null);
             } else {
                 dto.setTrung(false);
-                dto.setTienTrung(0);
-                dto.setSaiLyDo(List.of("Không trúng 2 chân"));
+                dto.setTienTrung(0.0);
+                dto.setTienTrungBaoLo(0.0);
+                dto.setTienTrungThuong(0.0);
+                dto.setTienTrungDacBiet(0.0);
+                dto.setGiaiTrung(null);
+                dto.setSaiLyDo(List.of("Không trúng 3 chân"));
             }
+
             return dto;
         }
+
+
+
+//        if (cachDanhChuanHoa.equals("3CHAN")) {
+//            dto.setTienDanh(so.getTienDanh());
+//            List<Object> danhSachKetQua = new ArrayList<>();
+//            danhSachKetQua.addAll(trungRepo.findAllByNgay(so.getNgay()));
+//            danhSachKetQua.addAll(bacRepo.findAllByNgay(so.getNgay()));
+//            danhSachKetQua.addAll(namRepo.findAllByNgay(so.getNgay()));
+//            baChanService.xuLyBaChan(dto, so.getSoDanh(), so.getTienDanh(), so.getMien(), danhSachKetQua);
+//            return dto;
+//        }
+
+        // 2 chân
+//        if (cachDanhChuanHoa.equals("2CHAN")) {
+//            dto.setTienDanh(so.getTienDanh());
+//            dto.setCachTrung("2 chân");
+//
+//            // Dò chi tiết kết quả 2 chân
+//            DoiChieuKetQuaDto ketQuaChiTiet = haiChanService.traVeKetQuaChiTiet2Chan(so);
+//
+//            // Gán kết quả chi tiết
+//            dto.setKetQuaTungDai(ketQuaChiTiet.getKetQuaTungDai());
+//
+//            // Gán danh sách đài
+//            dto.setDanhSachDai(
+//                    ketQuaChiTiet.getKetQuaTungDai().stream()
+//                            .map(DoiChieuKetQuaDto.KetQuaTheoDai::getTenDai)
+//                            .collect(Collectors.toList())
+//            );
+//
+//            if (ketQuaChiTiet.isTrung()) {
+//                dto.setTrung(true);
+//
+//                // ✅ Tính tổng tiền trúng dựa theo số lần trúng mỗi đài
+//                double tongTien = 0;
+//                for (DoiChieuKetQuaDto.KetQuaTheoDai dai : ketQuaChiTiet.getKetQuaTungDai()) {
+//                    if (dai.isTrung()) {
+////                        tongTien += tinhTienService.tinhTongTien2Chan(
+////                                so.getMien(),
+////                                Double.parseDouble(so.getTienDanh()),
+////                                dai.getSoLanTrung()
+//                        tongTien += tinhTienService.tinhTongTien2Chan(
+//                                dai.getMien(),
+//                                Double.parseDouble(so.getTienDanh()),
+//                                dai.getSoLanTrung()
+//                        );
+//                    }
+//                }
+//                dto.setTienTrung(tongTien);
+//
+//                // ✅ Ghi rõ đài nào trúng bao nhiêu lần
+//                dto.setGiaiTrung(
+//                        ketQuaChiTiet.getKetQuaTungDai().stream()
+//                                .filter(DoiChieuKetQuaDto.KetQuaTheoDai::isTrung)
+//                                .map(dai -> dai.getTenDai() + " (" + dai.getSoLanTrung() + " lần)")
+//                                .collect(Collectors.joining(", "))
+//                );
+//
+//                dto.setSaiLyDo(null);
+//            } else {
+//                dto.setTrung(false);
+//                dto.setTienTrung(0.0);
+//                dto.setGiaiTrung(null);
+//                dto.setSaiLyDo(List.of("Không trúng 2 chân"));
+//            }
+//
+//            return dto;
+//        }
+        // XỬ LÝ 2 CHÂN
+        if (cachDanhChuanHoa.equals("2CHAN")) {
+            dto.setTienDanh(so.getTienDanh());
+            dto.setCachTrung("2 chân");
+
+            // Dò chi tiết kết quả 2 chân
+            DoiChieuKetQuaDto ketQuaChiTiet = haiChanService.traVeKetQuaChiTiet2Chan(so);
+
+            // Gán kết quả chi tiết
+            dto.setKetQuaTungDai(ketQuaChiTiet.getKetQuaTungDai());
+
+            // Gán danh sách đài
+            dto.setDanhSachDai(
+                    ketQuaChiTiet.getKetQuaTungDai().stream()
+                            .map(DoiChieuKetQuaDto.KetQuaTheoDai::getTenDai)
+                            .collect(Collectors.toList())
+            );
+
+            // Kiểm tra có trúng hay không
+            if (ketQuaChiTiet.isTrung()) {
+                dto.setTrung(true);
+
+                double tongTien = 0;
+
+                // ✅ Tính tiền riêng cho từng đài, rồi cộng tổng
+                for (DoiChieuKetQuaDto.KetQuaTheoDai dai : ketQuaChiTiet.getKetQuaTungDai()) {
+                    if (dai.isTrung()) {
+                        double tienTrung = tinhTienService.tinhTongTien2Chan(
+                                dai.getMien(),                          // Tính theo MIỀN của từng đài
+                                Double.parseDouble(so.getTienDanh()),  // Tiền đánh
+                                dai.getSoLanTrung()                    // Số lần trúng
+                        );
+                        dai.setTienTrung(tienTrung); // ✅ Gán tiền riêng vào từng đài
+                        tongTien += tienTrung;       // ✅ Cộng vào tổng
+                    } else {
+                        dai.setTienTrung(0.0); // ✅ Đồng nhất dữ liệu
+                    }
+                }
+
+                dto.setTienTrung(tongTien);
+
+                // ✅ Ghi rõ đài nào trúng bao nhiêu lần
+                dto.setGiaiTrung(
+                        ketQuaChiTiet.getKetQuaTungDai().stream()
+                                .filter(DoiChieuKetQuaDto.KetQuaTheoDai::isTrung)
+                                .map(dai -> dai.getTenDai() + " (" + dai.getSoLanTrung() + " lần)")
+                                .collect(Collectors.joining(", "))
+                );
+
+                dto.setSaiLyDo(null);
+            } else {
+                dto.setTrung(false);
+                dto.setTienTrung(0.0);
+                dto.setGiaiTrung(null);
+                dto.setSaiLyDo(List.of("Không trúng 2 chân"));
+            }
+
+            return dto;
+        }
+
+
+
+
 
         // Xuyên
 //        if (xuyenService.laCachDanhXuyen(cachDanhChuanHoa)) {
@@ -134,7 +312,8 @@ public class KiemTraKetQuaService {
                 dto.setTenDai(tenDaiTrung.get());
             } else {
                 dto.setTrung(false);
-                dto.setTienTrung(0);
+                dto.setTienTrung(Double.valueOf(0));
+
                 dto.setSaiLyDo(List.of("Không trúng " + so.getCachDanh()));
             }
             return dto;
@@ -142,53 +321,75 @@ public class KiemTraKetQuaService {
 
 
         // ĐẦU
+
         if (cachDanhChuanHoa.equals("DAU")) {
             DoiChieuKetQuaDto ketQuaDau = dauService.xuLyDau(
-                    so.getSoDanh(),
-                    so.getMien(),
-                    so.getNgay(),
-                    so.getTienDanh()
+                    so.getSoDanh(),                   // String
+                    so.getMien(),                     // String
+                    so.getNgay(),                     // LocalDate
+                    so.getTienDanh(), // String
+                    so.getTenDai()
             );
+
             dto.setTrung(ketQuaDau.isTrung());
             dto.setGiaiTrung(ketQuaDau.getGiaiTrung());
             dto.setTienTrung(ketQuaDau.getTienTrung());
             dto.setCachTrung("ĐẦU");
             dto.setSaiLyDo(ketQuaDau.getSaiLyDo());
             dto.setTenDai(ketQuaDau.getTenDai());
+            dto.setDanhSachDai(ketQuaDau.getDanhSachDai());
+            dto.setGhiChu(ketQuaDau.getGhiChu());
+            dto.setKetQuaTungDai(ketQuaDau.getKetQuaTungDai());
             return dto;
         }
+
+
+
+
+
+
 // DUÔI
-        if(cachDanhChuanHoa.equals("DUOI")){
+        if (cachDanhChuanHoa.equals("DUOI")) {
             DoiChieuKetQuaDto ketQuaDuoi = duoiService.xuLyDuoi(
                     so.getSoDanh(),
                     so.getMien(),
                     so.getNgay(),
-                    so.getTienDanh()
+                    so.getTienDanh(),
+                    so.getTenDai() // thêm dòng này để truyền tên đài người chơi nhập
             );
             dto.setTrung(ketQuaDuoi.isTrung());
-            dto.setGiaiTrung((ketQuaDuoi.getGiaiTrung()));
+            dto.setGiaiTrung(ketQuaDuoi.getGiaiTrung());
             dto.setTienTrung(ketQuaDuoi.getTienTrung());
-            dto.setCachTrung("ĐUÔI");
+            dto.setCachTrung(ketQuaDuoi.getCachTrung());
             dto.setSaiLyDo(ketQuaDuoi.getSaiLyDo());
             dto.setTenDai(ketQuaDuoi.getTenDai());
+            dto.setDanhSachDai(ketQuaDuoi.getDanhSachDai());
+            dto.setGhiChu(ketQuaDuoi.getGhiChu()); // nếu có ghi chú như "Bạn chỉ dò 1 phần đài"
+            dto.setKetQuaTungDai(ketQuaDuoi.getKetQuaTungDai());
             return dto;
         }
-        // ĐẦU ĐUÔI
+
+// ĐẦU ĐUÔI
         if (cachDanhChuanHoa.equals("DAUDUOI")) {
             DoiChieuKetQuaDto ketQuaDauDuoi = dauDuoiService.xuLyDauDuoi(
                     so.getSoDanh(),
                     so.getMien(),
                     so.getNgay(),
-                    so.getTienDanh()
+                    so.getTienDanh(),
+                    so.getTenDai()
             );
             dto.setTrung(ketQuaDauDuoi.isTrung());
             dto.setGiaiTrung(ketQuaDauDuoi.getGiaiTrung());
             dto.setTienTrung(ketQuaDauDuoi.getTienTrung());
-            dto.setCachTrung("ĐẦU ĐUÔI");
+            dto.setCachTrung(ketQuaDauDuoi.getCachTrung());
             dto.setSaiLyDo(ketQuaDauDuoi.getSaiLyDo());
             dto.setTenDai(ketQuaDauDuoi.getTenDai());
+            dto.setDanhSachDai(ketQuaDauDuoi.getDanhSachDai());
+            dto.setGhiChu(ketQuaDauDuoi.getGhiChu());
+            dto.setKetQuaTungDai(ketQuaDauDuoi.getKetQuaTungDai());
             return dto;
         }
+
         // LỚN
         if (cachDanhChuanHoa.equals("LON")) {
             DoiChieuKetQuaDto ketQuaLon = lonService.xuLyLon(
@@ -261,6 +462,8 @@ public class KiemTraKetQuaService {
                 .replace('đ', 'd') // thay ký tự thường
                 .replace('Đ', 'D'); // thay ký tự hoa
     }
+
+
 
 }
 

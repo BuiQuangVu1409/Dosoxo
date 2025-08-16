@@ -5,7 +5,7 @@ public class GiaiSoDto {
     private String giai;
     private String soTrung;
 
-    public GiaiSoDto() {}
+
 
     public GiaiSoDto(String giai, String soTrung) {
         this.giai = giai;

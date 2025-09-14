@@ -2,11 +2,13 @@ package com.example.doxoso.service;
 
 import com.example.doxoso.model.DoiChieuKetQuaDto;
 
+import com.example.doxoso.model.SoNguoiChoi;
 import com.example.doxoso.repository.SoNguoiChoiRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 import java.util.stream.Collectors;
@@ -18,6 +20,8 @@ public class KetQuaService implements IKetQuaService {
     private SoNguoiChoiRepository soNguoiChoiRepo;
     @Autowired
     private KiemTraKetQuaService kiemTraKetQuaService;
+@Autowired
+private KetQuaNguoiChoiService ketQuaNguoiChoiService;
 
 
     @Override
@@ -62,6 +66,23 @@ public class KetQuaService implements IKetQuaService {
                         .replaceAll("\\s+", "") // xoá khoảng trắng
                         .toLowerCase(); // viết thường
     }
+    /**
+     * Dò kết quả và lưu DB cho danh sách số của 1 player.
+     */
+    public List<DoiChieuKetQuaDto> doKetQua(List<SoNguoiChoi> soNguoiChoiList) {
+        List<DoiChieuKetQuaDto> ketQuaList = new ArrayList<>();
 
+        for (SoNguoiChoi so : soNguoiChoiList) {
+            // B1: Dò số
+            DoiChieuKetQuaDto dto = kiemTraKetQuaService.kiemTraSo(so);
+
+            // B2: Lưu kết quả
+            ketQuaNguoiChoiService.luuKetQua(so, dto);
+
+            ketQuaList.add(dto);
+        }
+
+        return ketQuaList;
+    }
 
 }

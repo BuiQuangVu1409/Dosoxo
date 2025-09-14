@@ -12,7 +12,7 @@ import java.util.List;
 
 @Getter
 @Setter
-@Table(name = "Doi Chieu Ket Qua")
+//@Table(name = "Doi Chieu Ket Qua")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DoiChieuKetQuaDto {
 
@@ -31,7 +31,7 @@ public class DoiChieuKetQuaDto {
     private Double tienTrung;
     private String ghiChu;
     private List<String> saiLyDo;
-
+    private String ketQua;
 
     @JsonSerialize(using = DieuChinhKieuSo.class)
     private Double tienTrungBaoLo;
@@ -63,7 +63,6 @@ public class DoiChieuKetQuaDto {
         private String lyDo;
         private int soLanTrung;
 
-
-
     }
+
 }

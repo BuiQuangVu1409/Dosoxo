@@ -4,25 +4,21 @@ import com.example.doxoso.model.*;
 import com.example.doxoso.repository.KetQuaMienBacRepository;
 import com.example.doxoso.repository.KetQuaMienNamRepository;
 import com.example.doxoso.repository.KetQuaMienTrungRepository;
-import com.example.doxoso.repository.SoNguoiChoiRepository;
-import com.example.doxoso.service.DanhSachDaiTheoMienService;
-import com.example.doxoso.service.KetQuaService;
-import com.example.doxoso.service.KiemTraKetQuaService;
 
-import com.example.doxoso.service.LichQuayXoSoService;
+
+import com.example.doxoso.service.*;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
+
 import org.springframework.http.HttpStatus;
+
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.text.Normalizer;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -35,8 +31,7 @@ public class KetQuaController {
     @Autowired
     private KiemTraKetQuaService kiemTraKetQuaService;
 
-    @Autowired
-    private SoNguoiChoiRepository soNguoiChoiRepository;
+
     @Autowired
     private KetQuaMienBacRepository bacRepo;
 
@@ -46,13 +41,17 @@ public class KetQuaController {
     @Autowired
     private KetQuaMienNamRepository namRepo;
 
+    @Autowired
+    SoNguoiChoiService soNguoiChoiService;
+
+
 //GIAO DIỆN
 
 
-        @PostMapping("/doiso")
-        public Object doSo(@RequestBody SoNguoiChoi so) {
-            return kiemTraKetQuaService.kiemTraSo(so);
-        }
+    @PostMapping("/doiso")
+    public Object doSo(@RequestBody SoNguoiChoi so) {
+        return kiemTraKetQuaService.kiemTraSo(so);
+    }
 
 
     @GetMapping("/ketqua")
@@ -99,7 +98,6 @@ public class KetQuaController {
 ///ketqua?ngay=2025-08-11&mien=MIỀN NAM
 
 
-
     /**
      * Trả về danh sách đã đối chiếu tất cả số người chơi
      */
@@ -124,13 +122,6 @@ public class KetQuaController {
         return ketQuaService.layDanhSachSoTrat();
     }
 
-    /**
-     * Thêm một số người chơi mới (POST JSON)
-     */
-    @PostMapping("/them-so")
-    public SoNguoiChoi themSoNguoiChoi(@RequestBody SoNguoiChoi so) {
-        return soNguoiChoiRepository.save(so);
-    }
 
     /**
      * Đối chiếu 1 số người chơi cụ thể (POST JSON)
@@ -153,10 +144,10 @@ public class KetQuaController {
         if ("dau".equals(cachDanhNormalized)) {
             cachDanh = "dau";
         }
-        if("duoi".equals(cachDanhNormalized)){
+        if ("duoi".equals(cachDanhNormalized)) {
             cachDanh = "duoi";
         }
-        if("dauduoi".equals(cachDanhNormalized)){
+        if ("dauduoi".equals(cachDanhNormalized)) {
             cachDanh = "dauduoi";
         }
 
@@ -164,4 +155,32 @@ public class KetQuaController {
         // Bạn có thể mở rộng thêm các chuẩn hóa khác nếu cần
         return ketQuaService.locTheoKetQuaVaCachDanh(ketqua, cachDanh);
     }
+
+
 }
+//
+//    @GetMapping("/doketqua/{playerId}")
+//    public ResponseEntity<List<DoiChieuKetQuaDto>> doKetQua(@PathVariable Long playerId) {
+//        // Lấy danh sách số đã đánh của player
+//        List<SoNguoiChoi> soNguoiChoiList = soNguoiChoiService.getSoNguoiChoiByPlayerId(playerId);
+//
+//        if (soNguoiChoiList.isEmpty()) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+//                    .body(Collections.emptyList());
+//        }
+//
+//        // Dò kết quả
+//        List<DoiChieuKetQuaDto> ketQua = kiemTraKetQuaService.doKetQua(soNguoiChoiList);
+//
+//        return ResponseEntity.ok(ketQua);
+//
+//    }
+
+
+//    @GetMapping("/{id}")
+//    public ResponseEntity<?> getPlayerWithSoNguoiChoi(@PathVariable Long id) {
+//        return playerRepository.findWithSoNguoiChoiById(id)
+//                .<ResponseEntity<?>>map(ResponseEntity::ok)
+//                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
+//                        .body(Map.of("message", "Không tìm thấy Player với id = " + id)));
+//    }

@@ -459,10 +459,12 @@
 //}
 package com.example.doxoso.service;
 
-import com.example.doxoso.model.DoiChieuKetQuaDto;
+
+import com.example.doxoso.model.Player;
 import com.example.doxoso.repository.KetQuaMienBacRepository;
 import com.example.doxoso.repository.KetQuaMienNamRepository;
 import com.example.doxoso.repository.KetQuaMienTrungRepository;
+import com.example.doxoso.repository.PlayerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -471,39 +473,70 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 @Service
-public class TinhTienService implements ITinhTienService {
+public class TinhTienService  {
     @Autowired
     KetQuaMienBacRepository bacRepo;
     @Autowired
     KetQuaMienNamRepository namRepo;
     @Autowired
     KetQuaMienTrungRepository trungRepo;
+    @Autowired
+    PlayerRepository playerRepository;
+//    public double tinhTienTrung(Long playerId,String cachDanh, String tienDanh, String mien) {
+////        String loai = removeDiacritics(cachDanh).toUpperCase().replaceAll("\\s+", "");
+//        String loai = chuanHoaCachDanhXuyen(cachDanh);
+//
+//        double tienDanhDouble;
+////        if (loai.equals("3CHAN")) return 0; // đã xử lý riêng
+//
+//        try {
+//            tienDanhDouble = Double.parseDouble(tienDanh);
+//        } catch (NumberFormatException e) {
+//            throw new IllegalArgumentException("Giá trị tiền không hợp lệ: " + tienDanh, e);
+//        }
+//
+//        return switch (loai) {
+//            case "XUYEN2" -> getHeSoXuyen(2, tienDanhDouble, mien);
+//            case "XUYEN3" -> getHeSoXuyen(3, tienDanhDouble, mien);
+//            case "XUYEN4" -> getHeSoXuyen(4, tienDanhDouble, mien);
+//            case "XUYEN5" -> getHeSoXuyen(5, tienDanhDouble, mien);
+//            case "2CHAN"   -> getHeSo2Chan(tienDanhDouble, mien);
+//            case "DAU"     -> getHeSoDau(tienDanhDouble, mien);
+//            case "DUOI"    -> getHeSoDuoi(tienDanhDouble, mien);
+//            case "DAUDUOI" -> getHeSoDauDuoiCaCap(tienDanhDouble, mien);
+//            case "LON", "NHO" -> getHeSoLonNho(playerId,tienDanhDouble, mien);
+//            default -> 0;
+//        };
+//    }
+//private double getHeSoXuyen(int soXuyen, double tien, String mien) {
+//    String m = removeDiacritics(mien).toUpperCase();
+//    int heSo = switch (soXuyen) {
+//        case 2 -> m.contains("BAC") ? 10 : 15;
+//        case 3 -> m.contains("BAC") ? 40 : 60;
+//        case 4 -> m.contains("BAC") ? 100 : 120;
+//        case 5 -> m.contains("BAC") ? 200 : 250;
+//        default -> 0;
+//    };
+//    return tien * heSo;
+//}
 
-    public double tinhTienTrung(String cachDanh, String tienDanh, String mien) {
-        String loai = removeDiacritics(cachDanh).toUpperCase().replaceAll("\\s+", "");
-        double tienDanhDouble;
+    //====TÍNH TIỀN 2 CHÂN ============//
 
-//        if (loai.equals("3CHAN")) return 0; // đã xử lý riêng
-
-        try {
-            tienDanhDouble = Double.parseDouble(tienDanh);
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Giá trị tiền không hợp lệ: " + tienDanh, e);
-        }
-
-        return switch (loai) {
-            case "XUYEN2" -> getHeSoXuyen(2, tienDanhDouble, mien);
-            case "XUYEN3" -> getHeSoXuyen(3, tienDanhDouble, mien);
-            case "XUYEN4" -> getHeSoXuyen(4, tienDanhDouble, mien);
-            case "XUYEN5" -> getHeSoXuyen(5, tienDanhDouble, mien);
-            case "2CHAN"   -> getHeSo2Chan(tienDanhDouble, mien);
-            case "DAU"     -> getHeSoDau(tienDanhDouble, mien);
-            case "DUOI"    -> getHeSoDuoi(tienDanhDouble, mien);
-            case "DAUDUOI" -> getHeSoDauDuoiCaCap(tienDanhDouble, mien);
-            case "LON", "NHO" -> getHeSoLonNho(tienDanhDouble, mien);
-            default -> 0;
-        };
+    public double tinhTongTien2Chan(String mien, double tienDanh, int soLanTrung) {
+        if (soLanTrung <= 0) return 0;
+        double tienMotLan = getHeSo2Chan(tienDanh, mien);
+        return tienMotLan * soLanTrung;
     }
+
+    private double getHeSo2Chan(double tien, String mien) {
+        String m = removeDiacritics(mien).toUpperCase();
+        if (m.contains("BAC")) return tien * 70 / 27;
+        if (m.contains("TRUNG") || m.contains("NAM")) return tien * 70 / 18;
+        return 0;
+    }
+
+
+
 
     //========== TÍNH TIỀN ĐẦU ĐUÔI ==================
     public double tinhTienDauDuoi(boolean trungDau, boolean trungDuoi,
@@ -692,55 +725,147 @@ public class TinhTienService implements ITinhTienService {
             throw new IllegalArgumentException("Tiền đánh không hợp lệ cho 3 CHÂN: " + chuoi);
         }
     }
+//=========TÍNH TIỀN NHỎ===============//
+public double tinhTienNho(Long playerId,String cachDanh, String tienDanh, String mien) {
+    double tienDanhDouble;
 
+
+    try {
+        tienDanhDouble = Double.parseDouble(tienDanh);
+    } catch (NumberFormatException e) {
+        throw new IllegalArgumentException("Giá trị tiền không hợp lệ: " + tienDanh, e);
+    }
+    String loai = chuanHoaCachDanhXuyen(cachDanh);
+    Player player = playerRepository.findById(playerId)
+            .orElseThrow(() -> new RuntimeException("Không tìm thấy player với id: " + playerId));
+
+    double heSoCachDanh = player.getHeSoCachDanh();
+
+    String m = removeDiacritics(mien).toUpperCase();
+    if (m.contains("BAC") || m.contains("TRUNG") || m.contains("NAM")) {
+        return tienDanhDouble * heSoCachDanh;
+    }
+    return 0;
+}
+
+
+
+//================TÍNH TIỀN LỚN =================//
+public double tinhTienLon(Long playerId,String cachDanh, String tienDanh, String mien) {
+    String loai = chuanHoaCachDanhXuyen(cachDanh);
+    double tienDanhDouble;
+
+
+        try {
+            tienDanhDouble = Double.parseDouble(tienDanh);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Giá trị tiền không hợp lệ: " + tienDanh, e);
+        }
+    Player player = playerRepository.findById(playerId)
+            .orElseThrow(() -> new RuntimeException("Không tìm thấy player với id: " + playerId));
+
+    double heSoCachDanh = player.getHeSoCachDanh(); // lấy từ DB
+
+    String m = removeDiacritics(mien).toUpperCase();
+    if (m.contains("BAC") || m.contains("TRUNG") || m.contains("NAM")) {
+        return tienDanhDouble * heSoCachDanh;
+    }
+    return 0;
+}
+
+
+    public double getHeSoLonNho(Long playerId, double tien, String mien) {
+        // Lấy player theo id
+        Player player = playerRepository.findById(playerId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy player với id: " + playerId));
+
+        // Lấy hệ số cách đánh từ DB (ví dụ: 1.95)
+        double heSoCachDanh = player.getHeSoCachDanh();
+
+        // Chuẩn hóa miền
+        String m = removeDiacritics(mien).toUpperCase();
+        if (m.contains("BAC") || m.contains("TRUNG") || m.contains("NAM")) {
+            return tien * heSoCachDanh;
+        }
+
+        return 0;
+    }
+
+
+    //============== TÍNH TIỀN XUYÊN ==============//
+
+
+    public double tinhTienXuyen( String cachDanh, String tienDanh, String mien) {
+        // Chuẩn hóa cách đánh
+        String loai = removeDiacritics(cachDanh).toUpperCase().replaceAll("\\s+", "");
+        String m = removeDiacritics(mien).toUpperCase();
+
+        double tienDanhDouble;
+        try {
+            tienDanhDouble = Double.parseDouble(tienDanh);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Giá trị tiền không hợp lệ: " + tienDanh, e);
+        }
+
+        // Xác định số xuyên (2 → XUYEN2, 3 → XUYEN3 ...)
+        int soXuyen;
+        if (loai.equals("XUYEN2")) soXuyen = 2;
+        else if (loai.equals("XUYEN3")) soXuyen = 3;
+        else if (loai.equals("XUYEN4")) soXuyen = 4;
+        else if (loai.equals("XUYEN5")) soXuyen = 5;
+        else return 0; // Không phải loại xuyên thì thoát luôn
+
+        return tinhTienTheoMienXuyen(soXuyen, tienDanhDouble, m);
+    }
+
+    private double tinhTienTheoMienXuyen(int soXuyen, double tien, String mien) {
+        // Tách riêng từng miền, ghi rõ công thức
+        if (mien.contains("BAC")) {
+            return switch (soXuyen) {
+                case 2 -> tien * 10;   // Miền Bắc Xuyên 2 ăn gấp 10 lần
+                case 3 -> tien * 40;   // Miền Bắc Xuyên 3 ăn gấp 40 lần
+                case 4 -> tien * 100;  // Miền Bắc Xuyên 4 ăn gấp 100 lần
+                case 5 -> tien * 200;  // Miền Bắc Xuyên 5 ăn gấp 200 lần
+                default -> 0;
+            };
+        }
+        else if (mien.contains("TRUNG") || mien.contains("NAM")) {
+            return switch (soXuyen) {
+                case 2 -> tien * 15;   // Miền Trung / Nam Xuyên 2 ăn gấp 15 lần
+                case 3 -> tien * 60;   // Miền Trung / Nam Xuyên 3 ăn gấp 60 lần
+                case 4 -> tien * 120;  // Miền Trung / Nam Xuyên 4 ăn gấp 120 lần
+                case 5 -> tien * 250;  // Miền Trung / Nam Xuyên 5 ăn gấp 250 lần
+                default -> 0;
+            };
+        }
+        return 0;
+    }
 
 
 
 
 //=========== HÀM PHỤ =========
-    private double getHeSoXuyen(int soXuyen, double tien, String mien) {
-        String m = removeDiacritics(mien).toUpperCase();
-        int heSo = switch (soXuyen) {
-            case 2 -> m.contains("BAC") ? 10 : 15;
-            case 3 -> m.contains("BAC") ? 40 : 60;
-            case 4 -> m.contains("BAC") ? 100 : 120;
-            case 5 -> m.contains("BAC") ? 200 : 250;
-            default -> 0;
-        };
-        return tien * heSo;
-    }
-
-//===== TÍNH TIỀN 2 CHÂN =======
-    public double tinhTongTien2Chan(String mien, double tienDanh, int soLanTrung) {
-        if (soLanTrung <= 0) return 0;
-        double tienMotLan = getHeSo2Chan(tienDanh, mien);
-        return tienMotLan * soLanTrung;
-    }
-
-    private double getHeSo2Chan(double tien, String mien) {
-        String m = removeDiacritics(mien).toUpperCase();
-        if (m.contains("BAC")) return tien * 70 / 27;
-        if (m.contains("TRUNG") || m.contains("NAM")) return tien * 70 / 18;
-        return 0;
-    }
 
 
 
-    private double getHeSoDau(double tien, String mien) {
-        String m = removeDiacritics(mien).toUpperCase();
-        if (m.contains("BAC")) return tien * 70 / 4;
-        if (m.contains("TRUNG") || m.contains("NAM")) return tien * 70;
-        return 0;
-    }
 
-    private double getHeSoDuoi(double tien, String mien) {
-        String m = removeDiacritics(mien).toUpperCase();
-        return m.contains("BAC") || m.contains("TRUNG") || m.contains("NAM") ? tien * 70 : 0;
-    }
 
-    public double tinhTienDauDuoiCaCap(double tienDanh, String mien) {
-        return tinhTienDau(true, mien, tienDanh) + tinhTienDuoi(true, mien, tienDanh);
-    }
+
+//    private double getHeSoDau(double tien, String mien) {
+//        String m = removeDiacritics(mien).toUpperCase();
+//        if (m.contains("BAC")) return tien * 70 / 4;
+//        if (m.contains("TRUNG") || m.contains("NAM")) return tien * 70;
+//        return 0;
+//    }
+//
+//    private double getHeSoDuoi(double tien, String mien) {
+//        String m = removeDiacritics(mien).toUpperCase();
+//        return m.contains("BAC") || m.contains("TRUNG") || m.contains("NAM") ? tien * 70 : 0;
+//    }
+
+//    public double tinhTienDauDuoiCaCap(double tienDanh, String mien) {
+//        return tinhTienDau(true, mien, tienDanh) + tinhTienDuoi(true, mien, tienDanh);
+//    }
 
 
     private double getHeSoDauDuoiCaCap(double tien, String mien) {
@@ -750,11 +875,8 @@ public class TinhTienService implements ITinhTienService {
         return 0;
     }
 
-    private double getHeSoLonNho(double tien, String mien) {
-        String m = removeDiacritics(mien).toUpperCase();
-        if (m.contains("BAC") || m.contains("TRUNG") || m.contains("NAM")) return tien * 1.95;
-        return 0;
-    }
+
+
 
     private String removeDiacritics(String input) {
         String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
@@ -799,5 +921,36 @@ public class TinhTienService implements ITinhTienService {
             default -> giaiRaw.toUpperCase();
         };
     }
+    public String chuanHoaCachDanhXuyen(String cachDanh) {
+        if (cachDanh == null) return null;
+
+        // 1. Chuẩn hóa chuỗi gốc
+        String cd = removeDiacritics(cachDanh)      // bỏ dấu tiếng Việt
+                .toUpperCase()                      // viết hoa
+                .replaceAll("[\\s\\.,]+", "");      // bỏ khoảng trắng, dấu chấm, phẩy
+
+        // 2. Thay thế "XIÊN" -> "XUYEN"
+        cd = cd.replace("XIEN", "XUYEN");
+
+        // 3. Trường hợp dạng "2XUYEN" hoặc "3XUYEN" => chuẩn hóa "XUYEN2", "XUYEN3"
+        if (cd.matches("\\d+XUYEN\\d*")) {
+            String so = cd.replaceAll("\\D+", ""); // lấy số
+            return "XUYEN" + so;
+        }
+
+        // 4. Trường hợp dạng "XUYEN2", "XUYEN3" => đã chuẩn
+        if (cd.matches("XUYEN\\d+")) {
+            return cd;
+        }
+
+        // 5. Trường hợp chỉ ghi "XUYEN" hoặc "XIEN" => mặc định là "XUYEN2"
+        if (cd.equals("XUYEN") || cd.equals("XIEN")) {
+            return "XUYEN2";
+        }
+
+        // 6. Fallback: trả về dạng đã chuẩn hóa
+        return cd;
+    }
+
 
 }

@@ -1,6 +1,7 @@
     package com.example.doxoso.model;
 
     import com.fasterxml.jackson.annotation.JsonFormat;
+    import com.fasterxml.jackson.annotation.JsonIgnore;
     import jakarta.persistence.*;
     import lombok.AllArgsConstructor;
     import lombok.Getter;
@@ -20,15 +21,24 @@
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         private Long id;
-        private String giai;
+
+
         private String soDanh;
-        private String thu;
         private String tenDai;
         private String mien;
+
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
         private LocalDate ngay;
+
         private String cachDanh;
         private String tienDanh;
+        private String ketQua;
+
+        // Quan hệ với Player
+        @ManyToOne
+        @JoinColumn(name = "player_id", referencedColumnName = "id", nullable = false)
+        @JsonIgnore
+        private Player player;
 
 
     }

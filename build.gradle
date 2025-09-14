@@ -1,3 +1,9 @@
+//
+//
+//
+//
+//
+//
 //plugins {
 //    id 'java'
 //    id 'org.springframework.boot' version '3.5.0'
@@ -18,8 +24,8 @@
 //}
 //
 //dependencies {
-//    // Spring Boot Starter
-//    implementation 'org.springframework.boot:spring-boot-starter'
+//    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0' // Hoặc phiên bản mới hơ
+//    implementation 'org.springframework.boot:spring-boot-starter-test'
 //    implementation 'org.springframework.boot:spring-boot-starter-web'
 //    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 //    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -33,10 +39,12 @@
 //    implementation 'org.modelmapper:modelmapper:3.1.1'
 //
 //    // Xử lý thời gian với Jackson
-//    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+//    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.4'
 //
 //    // Cơ sở dữ liệu MySQL
-//    runtimeOnly 'com.mysql:mysql-connector-j'
+////    runtimeOnly 'com.mysql:mysql-connector-j'
+//    runtimeOnly 'mysql:mysql-connector-j'
+//
 //
 //    // Dev Tools (hot reload)
 //    developmentOnly 'org.springframework.boot:spring-boot-devtools'
@@ -45,22 +53,17 @@
 //    compileOnly 'org.projectlombok:lombok'
 //    annotationProcessor 'org.projectlombok:lombok'
 //
-//    // Test implementation
-//    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
-//    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+//    // (Tùy chọn - nếu bạn cần test sau này)
+//    // testImplementation 'org.springframework.boot:spring-boot-starter-test'
 //}
 //
 //tasks.named('test') {
 //    useJUnitPlatform()
 //}
-
-
-
-
-
-
-
-
+//
+//
+//
+//
 plugins {
     id 'java'
     id 'org.springframework.boot' version '3.5.0'
@@ -81,82 +84,30 @@ repositories {
 }
 
 dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0' // Hoặc phiên bản mới hơ
-    implementation 'org.springframework.boot:spring-boot-starter-test'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
 
-    // Web Scraping (Jsoup)
     implementation 'org.jsoup:jsoup:1.17.1'
-
-    // Chuyển đổi DTO
     implementation 'org.modelmapper:modelmapper:3.1.1'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 
-    // Xử lý thời gian với Jackson
-    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.4'
+    // ✅ ĐÚNG: MySQL Connector/J
+    // Dùng BOM của Spring Boot thì có thể bỏ version:
+    // runtimeOnly 'com.mysql:mysql-connector-j'
+    // Hoặc pin version rõ ràng (khuyến nghị):
+    runtimeOnly 'com.mysql:mysql-connector-j:8.4.0'
 
-    // Cơ sở dữ liệu MySQL
-    runtimeOnly 'com.mysql:mysql-connector-j'
-
-    // Dev Tools (hot reload)
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
-    // Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
-    // (Tùy chọn - nếu bạn cần test sau này)
-    // testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
 tasks.named('test') {
     useJUnitPlatform()
 }
-
-
-
-
-//plugins {
-//    id 'java'
-//    id 'org.springframework.boot' version '3.5.0'
-//    id 'io.spring.dependency-management' version '1.1.7'
-//}
-//
-//group = 'com.example'
-//version = '0.0.1-SNAPSHOT'
-//
-//java {
-//    toolchain {
-//        languageVersion = JavaLanguageVersion.of(21)
-//    }
-//}
-//
-//repositories {
-//    mavenCentral()
-//}
-//
-//dependencies {
-//    implementation 'org.springframework.boot:spring-boot-starter' // Thư viện chính của Spring Boot
-//    implementation 'org.springframework.boot:spring-boot-starter-web'
-//    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-//    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-//    implementation 'org.springframework.boot:spring-boot-starter-validation'
-//    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
-//
-//    implementation 'org.jsoup:jsoup:1.17.1'
-//    implementation 'org.modelmapper:modelmapper:3.1.1'
-//    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
-//    runtimeOnly 'com.mysql:mysql-connector-j'
-//    developmentOnly 'org.springframework.boot:spring-boot-devtools'
-//    compileOnly 'org.projectlombok:lombok'
-//    annotationProcessor 'org.projectlombok:lombok'
-//    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
-//    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-//}
-//
-//tasks.named('test') {
-//    useJUnitPlatform()
-//}

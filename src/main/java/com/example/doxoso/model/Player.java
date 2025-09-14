@@ -20,8 +20,15 @@ public class Player {
 
         private String name;
         private String phone;
+        private Double hoaHong;
+        private Double heSoCachDanh;
 
-        @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
-        private List<Bet> bets;
+        // ✅ chỉ dùng để build DTO, không lưu DB
+        @Transient
+        private List<DoiChieuKetQuaDto> ketQua;
 
+        @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+        private List<SoNguoiChoi> soNguoiChoi;
 }
+
+//       orphanRemoval = true
